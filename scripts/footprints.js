@@ -2,7 +2,7 @@
  * Resolucion de huellas: cuantas casillas ocupa un objeto.
  *
  * Cascada de prioridades, de mas explicita a mas adivinada:
- *   1. `flags.velvet-grid-piles.size`  -> lo que el GM fijo a mano aqui.
+ *   1. `flags.velvet-shopping-experience.size`  -> lo que el GM fijo a mano aqui.
  *   2. `flags.item-piles.width/height` -> lo que ya usan los vaults de Item Piles.
  *   3. Flags de los compendios de Fatmorbus (Stoneshard Items, Food & Drink).
  *   4. Dimensiones del PNG, si son multiplo exacto de 108 px.

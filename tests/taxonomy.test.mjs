@@ -10,10 +10,10 @@ globalThis.game = {
   settings: { get: () => 76 },
   i18n: {
     localize: (k) => ({
-      "VGP.Group.weapon": "Armas", "VGP.Group.armor": "Armaduras", "VGP.Group.ammo": "Municion",
-      "VGP.Group.consumable": "Consumibles", "VGP.Group.equipment": "Equipo",
-      "VGP.Group.container": "Contenedores", "VGP.Group.tool": "Herramientas",
-      "VGP.Group.treasure": "Tesoro", "VGP.Group.misc": "Miscelaneo"
+      "VSE.Group.weapon": "Armas", "VSE.Group.armor": "Armaduras", "VSE.Group.ammo": "Municion",
+      "VSE.Group.consumable": "Consumibles", "VSE.Group.equipment": "Equipo",
+      "VSE.Group.container": "Contenedores", "VSE.Group.tool": "Herramientas",
+      "VSE.Group.treasure": "Tesoro", "VSE.Group.misc": "Miscelaneo"
     }[k] ?? k)
   },
   itempiles: { API: {} }

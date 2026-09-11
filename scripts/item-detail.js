@@ -49,25 +49,25 @@ function factsOf(item, extra = {}) {
   };
 
   const quantity = api()?.getItemQuantity?.(item);
-  if (Number.isFinite(quantity) && quantity > 1) push(game.i18n.localize("VGP.Detail.Quantity"), quantity);
+  if (Number.isFinite(quantity) && quantity > 1) push(game.i18n.localize("VSE.Detail.Quantity"), quantity);
 
-  push(game.i18n.localize("VGP.Detail.Category"), extra.category);
-  push(game.i18n.localize("VGP.Detail.Rarity"), extra.rarity);
+  push(game.i18n.localize("VSE.Detail.Category"), extra.category);
+  push(game.i18n.localize("VSE.Detail.Rarity"), extra.rarity);
 
   // PF2e: nivel y volumen. D&D 5e: peso.
   const level = getProperty(item, "system.level.value");
-  if (Number.isFinite(level)) push(game.i18n.localize("VGP.Detail.Level"), level);
+  if (Number.isFinite(level)) push(game.i18n.localize("VSE.Detail.Level"), level);
 
   const bulk = getProperty(item, "system.bulk.value");
-  if (Number.isFinite(bulk)) push(game.i18n.localize("VGP.Detail.Bulk"), bulk);
+  if (Number.isFinite(bulk)) push(game.i18n.localize("VSE.Detail.Bulk"), bulk);
 
   const weight = getProperty(item, "system.weight.value") ?? getProperty(item, "system.weight");
   if (Number.isFinite(Number(weight)) && !Number.isFinite(bulk)) {
-    push(game.i18n.localize("VGP.Detail.Weight"), Number(weight));
+    push(game.i18n.localize("VSE.Detail.Weight"), Number(weight));
   }
 
   if (extra.footprint) {
-    push(game.i18n.localize("VGP.Detail.Size"), `${extra.footprint.w} x ${extra.footprint.h}`);
+    push(game.i18n.localize("VSE.Detail.Size"), `${extra.footprint.w} x ${extra.footprint.h}`);
   }
 
   return facts;
@@ -105,8 +105,8 @@ async function enrichDescription(item) {
 
 export class ItemDetailApp extends (ApplicationV2 ?? Application) {
   static DEFAULT_OPTIONS = {
-    classes: ["vgp-window", "vgp-detail-window"],
-    window: { title: "VGP.Detail.Title", icon: "fas fa-scroll", resizable: true },
+    classes: ["vse-window", "vse-detail-window"],
+    window: { title: "VSE.Detail.Title", icon: "fas fa-scroll", resizable: true },
     position: { width: 460, height: 620 }
   };
 
@@ -116,7 +116,7 @@ export class ItemDetailApp extends (ApplicationV2 ?? Application) {
     this.context = context; // { grid, side, price, category, rarity, footprint }
   }
 
-  get title() { return this.item?.name ?? game.i18n.localize("VGP.Detail.Title"); }
+  get title() { return this.item?.name ?? game.i18n.localize("VSE.Detail.Title"); }
 
   static show(item, context = {}) {
     const app = new ItemDetailApp(item, context, {
@@ -138,53 +138,53 @@ export class ItemDetailApp extends (ApplicationV2 ?? Application) {
     const rarityClass = rarity ? ` is-${String(rarity).toLowerCase()}` : "";
 
     return `
-      <div class="vgp-detail${rarityClass}">
-        <header class="vgp-detail-head">
-          <div class="vgp-detail-art">
+      <div class="vse-detail${rarityClass}">
+        <header class="vse-detail-head">
+          <div class="vse-detail-art">
             <img src="${esc(item.img)}" alt="">
           </div>
-          <div class="vgp-detail-ident">
+          <div class="vse-detail-ident">
             <h2>${esc(item.name)}</h2>
-            ${category ? `<span class="vgp-detail-kind">${esc(category)}</span>` : ""}
-            ${rarity ? `<span class="vgp-detail-rarity">${esc(
-              game.i18n.localize(`VGP.Rarity.${rarity}`)
+            ${category ? `<span class="vse-detail-kind">${esc(category)}</span>` : ""}
+            ${rarity ? `<span class="vse-detail-rarity">${esc(
+              game.i18n.localize(`VSE.Rarity.${rarity}`)
             )}</span>` : ""}
           </div>
         </header>
 
         ${price ? `
-          <div class="vgp-detail-price">
+          <div class="vse-detail-price">
             <i class="fas fa-coins"></i>
             <b>${esc(price)}</b>
-            ${notForSale ? `<span class="vgp-detail-flag">${esc(
-              game.i18n.localize("VGP.Warn.NotForSale")
+            ${notForSale ? `<span class="vse-detail-flag">${esc(
+              game.i18n.localize("VSE.Warn.NotForSale")
             )}</span>` : ""}
           </div>` : ""}
 
         ${facts.length ? `
-          <dl class="vgp-detail-facts">
+          <dl class="vse-detail-facts">
             ${facts.map(([label, value]) => `
               <div><dt>${esc(label)}</dt><dd>${esc(value)}</dd></div>`).join("")}
           </dl>` : ""}
 
         ${tags.length ? `
-          <ul class="vgp-detail-tags">
+          <ul class="vse-detail-tags">
             ${tags.map((tag) => `<li>${esc(tag)}</li>`).join("")}
           </ul>` : ""}
 
-        <div class="vgp-detail-body">
-          ${description || `<p class="vgp-detail-empty">${esc(
-            game.i18n.localize("VGP.Detail.NoDescription")
+        <div class="vse-detail-body">
+          ${description || `<p class="vse-detail-empty">${esc(
+            game.i18n.localize("VSE.Detail.NoDescription")
           )}</p>`}
         </div>
 
-        <footer class="vgp-detail-foot">
+        <footer class="vse-detail-foot">
           ${canBuy ? `
-            <button type="button" class="vgp-mini" data-vgp-detail="take">
+            <button type="button" class="vse-mini" data-vse-detail="take">
               <i class="fas fa-hand-holding"></i> ${esc(buyLabel)}
             </button>` : ""}
-          <button type="button" class="vgp-mini" data-vgp-detail="sheet">
-            <i class="fas fa-file-lines"></i> ${esc(game.i18n.localize("VGP.Detail.OpenSheet"))}
+          <button type="button" class="vse-mini" data-vse-detail="sheet">
+            <i class="fas fa-file-lines"></i> ${esc(game.i18n.localize("VSE.Detail.OpenSheet"))}
           </button>
         </footer>
       </div>`;
@@ -192,8 +192,8 @@ export class ItemDetailApp extends (ApplicationV2 ?? Application) {
 
   _replaceHTML(result, element) {
     element.innerHTML = result;
-    for (const button of element.querySelectorAll("[data-vgp-detail]")) {
-      button.addEventListener("click", (event) => this._onAction(event, button.dataset.vgpDetail));
+    for (const button of element.querySelectorAll("[data-vse-detail]")) {
+      button.addEventListener("click", (event) => this._onAction(event, button.dataset.vseDetail));
     }
     return element;
   }

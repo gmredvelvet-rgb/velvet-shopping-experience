@@ -60,7 +60,7 @@ const check = (nombre, cond, extra = "") => {
 function tienda(sonidos = SONIDOS) {
   return {
     uuid: "Actor.tienda", name: "Tienda", img: "t.webp",
-    getFlag: (scope, key) => (scope === "velvet-grid-piles" ? sonidos[key] : undefined),
+    getFlag: (scope, key) => (scope === "velvet-shopping-experience" ? sonidos[key] : undefined),
     items: { get: () => undefined }
   };
 }

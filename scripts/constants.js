@@ -1,12 +1,12 @@
 /**
  * Constantes compartidas.
  *
- * Todo lo que este modulo guarda vive bajo `flags.velvet-grid-piles`; los
+ * Todo lo que este modulo guarda vive bajo `flags.velvet-shopping-experience`; los
  * tamanos de objeto se leen tambien desde `flags.item-piles` para que un item
  * colocado en un vault de Item Piles conserve su huella aqui y viceversa.
  */
 
-export const MODULE_ID = "velvet-grid-piles";
+export const MODULE_ID = "velvet-shopping-experience";
 
 /** Claves de flag propias, sobre actores y sobre objetos. */
 export const FLAGS = Object.freeze({

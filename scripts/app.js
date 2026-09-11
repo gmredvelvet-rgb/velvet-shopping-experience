@@ -100,7 +100,7 @@ function currencyLine(actor) {
         ? abbreviation.replace("{#}", currency.quantity)
         : `${currency.quantity} ${currency.name ?? ""}`;
       const icon = currency.img ? `<img src="${esc(currency.img)}" alt="">` : "";
-      return `<span class="vgp-coin" title="${esc(currency.name)}">${icon}${esc(text.trim())}</span>`;
+      return `<span class="vse-coin" title="${esc(currency.name)}">${icon}${esc(text.trim())}</span>`;
     }).join("");
   } catch (error) {
     warn("No se pudieron leer las monedas", error);
@@ -113,7 +113,7 @@ function priceStringFor(item, seller, buyer) {
     const priceData = api().getPricesForItem(item, { seller, buyer }) ?? [];
     const primary = priceData.find((entry) => entry.primary) ?? priceData[0];
     if (!primary) return "";
-    if (primary.free) return game.i18n.localize("VGP.Free");
+    if (primary.free) return game.i18n.localize("VSE.Free");
     return primary.priceString ?? "";
   } catch {
     return "";
@@ -246,7 +246,7 @@ export function categoryOf(item) {
 
 export function categoryLabel(value) {
   if (value.startsWith("custom:")) return value.slice(7);
-  const key = `VGP.Group.${value}`;
+  const key = `VSE.Group.${value}`;
   const label = game.i18n.localize(key);
   if (label !== key) return label;
 
@@ -347,7 +347,7 @@ function bindImagePickers(root) {
   const FilePicker = foundry.applications?.apps?.FilePicker?.implementation ?? globalThis.FilePicker;
   if (!FilePicker) return;
 
-  for (const button of root.querySelectorAll(".vgp-browse")) {
+  for (const button of root.querySelectorAll(".vse-browse")) {
     button.addEventListener("click", (event) => {
       event.preventDefault();
       const input = root.querySelector(`[name="${button.dataset.target}"]`);
@@ -394,7 +394,7 @@ function usablePath(path, kind) {
     const key = `${kind}:${value}`;
     if (!WARNED.has(key) && game.user.isGM) {
       WARNED.add(key);
-      ui.notifications.error(game.i18n.format("VGP.Warn.AbsolutePath", { path: value }), { permanent: true });
+      ui.notifications.error(game.i18n.format("VSE.Warn.AbsolutePath", { path: value }), { permanent: true });
       warn(`Ruta fuera de la carpeta de datos de Foundry: ${value}`);
     }
     return "";
@@ -455,22 +455,22 @@ const ApplicationV2 = foundry.applications?.api?.ApplicationV2;
 
 export class GridPileApp extends (ApplicationV2 ?? Application) {
   static DEFAULT_OPTIONS = {
-    classes: ["vgp-window"],
+    classes: ["vse-window"],
     window: {
-      title: "VGP.Title",
+      title: "VSE.Title",
       icon: "fas fa-grip",
       resizable: true,
       // En la barra de titulo, con etiqueta: el engranaje del divisor es
       // diminuto y nadie encuentra ahi los ajustes del decorado.
       controls: [{
         icon: "fas fa-image",
-        label: "VGP.Configure",
-        action: "vgpConfigure",
+        label: "VSE.Configure",
+        action: "vseConfigure",
         visible: () => game.user.isGM
       }]
     },
     actions: {
-      vgpConfigure(event) {
+      vseConfigure(event) {
         event.preventDefault();
         return this._configure();
       }
@@ -488,7 +488,7 @@ export class GridPileApp extends (ApplicationV2 ?? Application) {
   }
 
   get title() {
-    return this.shopName || this.pile?.name || game.i18n.localize("VGP.Title");
+    return this.shopName || this.pile?.name || game.i18n.localize("VSE.Title");
   }
 
   get isMerchant() { return Boolean(api()?.isItemPileMerchant?.(this.pile)); }
@@ -681,7 +681,7 @@ export class GridPileApp extends (ApplicationV2 ?? Application) {
     this._widths ??= {};
     let needsRender = false;
 
-    for (const wrap of scope.querySelectorAll(".vgp-grid-wrap")) {
+    for (const wrap of scope.querySelectorAll(".vse-grid-wrap")) {
       const key = wrap.dataset.side;
       const styles = getComputedStyle(wrap);
       const padding = parseFloat(styles.paddingLeft) + parseFloat(styles.paddingRight);
@@ -691,7 +691,7 @@ export class GridPileApp extends (ApplicationV2 ?? Application) {
       const previous = this._widths[key];
       this._widths[key] = width;
 
-      const grid = wrap.querySelector(".vgp-grid");
+      const grid = wrap.querySelector(".vse-grid");
       if (!grid) continue;
 
       const drawnCols = Number(grid.dataset.cols) || 1;
@@ -701,7 +701,7 @@ export class GridPileApp extends (ApplicationV2 ?? Application) {
         continue;
       }
       const cell = this._cellSizeFor(key, drawnCols);
-      grid.style.setProperty("--vgp-cell", `${cell}px`);
+      grid.style.setProperty("--vse-cell", `${cell}px`);
       // Con la casilla pequena la etiqueta se comeria el icono: mejor solo arte.
       grid.classList.toggle("is-compact", cell < COMPACT_CELL);
     }
@@ -719,7 +719,7 @@ export class GridPileApp extends (ApplicationV2 ?? Application) {
     this._resizeObserver?.disconnect();
     if (typeof ResizeObserver !== "function") return;
     this._resizeObserver = new ResizeObserver(() => this._fitGrids());
-    for (const wrap of root.querySelectorAll(".vgp-grid-wrap")) this._resizeObserver.observe(wrap);
+    for (const wrap of root.querySelectorAll(".vse-grid-wrap")) this._resizeObserver.observe(wrap);
   }
 
   /* ---------------------------------------- */
@@ -754,13 +754,13 @@ export class GridPileApp extends (ApplicationV2 ?? Application) {
   }
 
   _rememberScroll(element) {
-    for (const wrap of element.querySelectorAll(".vgp-grid-wrap")) {
+    for (const wrap of element.querySelectorAll(".vse-grid-wrap")) {
       this._scroll[wrap.dataset.side] = wrap.scrollTop;
     }
   }
 
   _restoreScroll(element) {
-    for (const wrap of element.querySelectorAll(".vgp-grid-wrap")) {
+    for (const wrap of element.querySelectorAll(".vse-grid-wrap")) {
       const saved = this._scroll[wrap.dataset.side];
       if (saved) wrap.scrollTop = saved;
     }
@@ -774,7 +774,7 @@ export class GridPileApp extends (ApplicationV2 ?? Application) {
     this._focus = null;
     if (!focus) return;
 
-    const input = element.querySelector(`.vgp-search[data-side="${focus.side}"]`);
+    const input = element.querySelector(`.vse-search[data-side="${focus.side}"]`);
     if (!input) return;
     input.focus();
     const caret = focus.caret ?? input.value.length;
@@ -836,23 +836,23 @@ export class GridPileApp extends (ApplicationV2 ?? Application) {
     // setProperty: un `url("...")` dentro de style="..." cierra el atributo con
     // sus propias comillas y anula la variable entera.
     const style = [
-      `--vgp-cell:${cell}px`,
-      `--vgp-portrait:${portrait}px`,
-      `--vgp-portrait-max:${Math.round(portrait * 1.6)}px`
+      `--vse-cell:${cell}px`,
+      `--vse-portrait:${portrait}px`,
+      `--vse-portrait-max:${Math.round(portrait * 1.6)}px`
     ].join(";");
 
     // Una <img> de verdad, no una variable CSS con url() dentro: el `src` de un
     // atributo HTML se resuelve contra el documento y no depende de donde se
     // haya declarado una custom property ni de la base de la hoja de estilos.
     const scene = background
-      ? `<img class="vgp-scene-layer" src="${esc(routeFor(background))}" alt="">`
+      ? `<img class="vse-scene-layer" src="${esc(routeFor(background))}" alt="">`
       : "";
 
     return `
-      <div class="vgp-root${background ? " has-scene" : ""}" style="${style}">
+      <div class="vse-root${background ? " has-scene" : ""}" style="${style}">
         ${scene}
         ${this._panelMarkup(source)}
-        <div class="vgp-divider">
+        <div class="vse-divider">
           <i class="fas fa-right-left"></i>
           ${this._dividerButtons()}
         </div>
@@ -862,13 +862,13 @@ export class GridPileApp extends (ApplicationV2 ?? Application) {
 
   _dividerButtons() {
     const takeAll = this.recipient && !this.isMerchant ? `
-      <button type="button" class="vgp-mini" data-vgp-action="take-all"
-              title="${esc(game.i18n.localize("VGP.TakeAll"))}">
+      <button type="button" class="vse-mini" data-vse-action="take-all"
+              title="${esc(game.i18n.localize("VSE.TakeAll"))}">
         <i class="fas fa-hand-holding"></i>
       </button>` : "";
     const configure = game.user.isGM ? `
-      <button type="button" class="vgp-mini" data-vgp-action="configure"
-              title="${esc(game.i18n.localize("VGP.Configure"))}">
+      <button type="button" class="vse-mini" data-vse-action="configure"
+              title="${esc(game.i18n.localize("VSE.Configure"))}">
         <i class="fas fa-sliders"></i>
       </button>` : "";
     return takeAll + configure;
@@ -885,37 +885,37 @@ export class GridPileApp extends (ApplicationV2 ?? Application) {
       : actor?.img;
 
     const defaultRole = isSource
-      ? game.i18n.localize(this.isMerchant ? "VGP.Merchant" : "VGP.Container")
-      : game.i18n.localize("VGP.Yours");
+      ? game.i18n.localize(this.isMerchant ? "VSE.Merchant" : "VSE.Container")
+      : game.i18n.localize("VSE.Yours");
     const role = isSource ? (this.vendorName || defaultRole) : defaultRole;
 
     const quote = isSource ? plainText(pileFlag(this.pile, "description")) : "";
-    const defaultName = actor?.name ?? game.i18n.localize("VGP.NoCharacter");
+    const defaultName = actor?.name ?? game.i18n.localize("VSE.NoCharacter");
     const name = isSource ? (this.shopName || defaultName) : defaultName;
 
     return `
-      <header class="vgp-scene-head">
-        <div class="vgp-portrait">
+      <header class="vse-scene-head">
+        <div class="vse-portrait">
           ${portrait ? `<img src="${esc(portrait)}" alt="">` : `<i class="fas fa-user-slash"></i>`}
         </div>
-        <div class="vgp-ident">
+        <div class="vse-ident">
           <h2>${esc(name)}</h2>
-          <span class="vgp-role">${esc(role)}</span>
-          ${quote ? `<p class="vgp-quote">&ldquo;${esc(quote)}&rdquo;</p>` : ""}
+          <span class="vse-role">${esc(role)}</span>
+          ${quote ? `<p class="vse-quote">&ldquo;${esc(quote)}&rdquo;</p>` : ""}
         </div>
-        <div class="vgp-currencies">${side.currencies}</div>
+        <div class="vse-currencies">${side.currencies}</div>
       </header>`;
   }
 
   /** Pestanas de categoria, construidas con los tipos presentes. */
   _tabsMarkup(side) {
     if (side.categories.length <= 1) return "";
-    const tabs = [["all", game.i18n.localize("VGP.All"), "fas fa-border-all"], ...side.categories];
+    const tabs = [["all", game.i18n.localize("VSE.All"), "fas fa-border-all"], ...side.categories];
     return `
-      <nav class="vgp-tabs">
+      <nav class="vse-tabs">
         ${tabs.map(([value, label, icon]) => `
-          <button type="button" class="vgp-tab${side.filters.category === value ? " is-active" : ""}"
-                  data-vgp-filter="category" data-side="${side.key}" data-value="${esc(value)}">
+          <button type="button" class="vse-tab${side.filters.category === value ? " is-active" : ""}"
+                  data-vse-filter="category" data-side="${side.key}" data-value="${esc(value)}">
             <i class="${esc(icon ?? categoryIcon(value))}"></i>
             <span>${esc(label)}</span>
           </button>`).join("")}
@@ -924,21 +924,21 @@ export class GridPileApp extends (ApplicationV2 ?? Application) {
 
   _toolbarMarkup(side) {
     const sorts = [
-      ["manual", "VGP.Sort.Manual"],
-      ["type", "VGP.Sort.Type"],
-      ["name", "VGP.Sort.Name"],
-      ["priceAsc", "VGP.Sort.PriceAsc"],
-      ["priceDesc", "VGP.Sort.PriceDesc"]
+      ["manual", "VSE.Sort.Manual"],
+      ["type", "VSE.Sort.Type"],
+      ["name", "VSE.Sort.Name"],
+      ["priceAsc", "VSE.Sort.PriceAsc"],
+      ["priceDesc", "VSE.Sort.PriceDesc"]
     ];
     return `
-      <div class="vgp-toolbar">
-        <label class="vgp-search-wrap">
+      <div class="vse-toolbar">
+        <label class="vse-search-wrap">
           <i class="fas fa-magnifying-glass"></i>
-          <input type="search" class="vgp-search" data-side="${side.key}"
+          <input type="search" class="vse-search" data-side="${side.key}"
                  value="${esc(side.filters.query)}"
-                 placeholder="${esc(game.i18n.localize("VGP.Search"))}">
+                 placeholder="${esc(game.i18n.localize("VSE.Search"))}">
         </label>
-        <select class="vgp-sort" data-vgp-filter="sort" data-side="${side.key}">
+        <select class="vse-sort" data-vse-filter="sort" data-side="${side.key}">
           ${sorts.map(([value, key]) => `
             <option value="${value}" ${side.filters.sort === value ? "selected" : ""}>
               ${esc(game.i18n.localize(key))}
@@ -949,27 +949,27 @@ export class GridPileApp extends (ApplicationV2 ?? Application) {
 
   _panelMarkup(side) {
     const overflow = side.overflow.length
-      ? `<span class="vgp-overflow">${esc(game.i18n.format("VGP.Overflow", { count: side.overflow.length }))}</span>`
+      ? `<span class="vse-overflow">${esc(game.i18n.format("VSE.Overflow", { count: side.overflow.length }))}</span>`
       : "";
 
     const picker = side.key === "target" ? `
-      <button type="button" class="vgp-mini vgp-picker" data-vgp-action="pick-actor">
-        <i class="fas fa-user"></i> ${esc(game.i18n.localize("VGP.PickCharacter"))}
+      <button type="button" class="vse-mini vse-picker" data-vse-action="pick-actor">
+        <i class="fas fa-user"></i> ${esc(game.i18n.localize("VSE.PickCharacter"))}
       </button>` : "";
 
     const empty = side.tiles.length ? "" : `
-      <p class="vgp-empty">${esc(game.i18n.localize(
-        side.total ? "VGP.NoMatches" : "VGP.Empty"
+      <p class="vse-empty">${esc(game.i18n.localize(
+        side.total ? "VSE.NoMatches" : "VSE.Empty"
       ))}</p>`;
 
     return `
-      <section class="vgp-panel" data-side="${side.key}">
+      <section class="vse-panel" data-side="${side.key}">
         ${this._sceneMarkup(side)}
-        <div class="vgp-frame">
+        <div class="vse-frame">
           ${this._tabsMarkup(side)}
           ${this._toolbarMarkup(side)}
-          <div class="vgp-grid-wrap" data-side="${side.key}">
-            <div class="vgp-grid" data-side="${side.key}" data-cols="${side.cols}" data-rows="${side.rows}"
+          <div class="vse-grid-wrap" data-side="${side.key}">
+            <div class="vse-grid" data-side="${side.key}" data-cols="${side.cols}" data-rows="${side.rows}"
                  data-uuid="${esc(side.actor?.uuid ?? "")}"
                  style="--cols:${side.cols};--rows:${side.rows}">
               ${side.tiles.map((tile) => this._tileMarkup(tile, side.key)).join("")}
@@ -977,7 +977,7 @@ export class GridPileApp extends (ApplicationV2 ?? Application) {
             ${empty}
           </div>
         </div>
-        <footer class="vgp-panel-foot">
+        <footer class="vse-panel-foot">
           ${overflow}
           ${picker}
         </footer>
@@ -1001,17 +1001,17 @@ export class GridPileApp extends (ApplicationV2 ?? Application) {
     }
 
     const rarity = rarityOf(item);
-    const classes = ["vgp-tile"];
+    const classes = ["vse-tile"];
     if (notForSale) classes.push("is-locked");
     if (hiddenItem) classes.push("is-hidden-item");
     if (rarity) classes.push(`is-${rarity.toLowerCase()}`);
 
     const tooltip = quantity > 1 ? `${item.name} &times;${quantity}` : item.name;
     const label = setting("showLabels") ? `
-      <span class="vgp-label">
-        <span class="vgp-name">${esc(item.name)}</span>
-        ${price ? `<span class="vgp-price">${esc(price)}</span>` : ""}
-      </span>` : (price ? `<span class="vgp-price is-floating">${esc(price)}</span>` : "");
+      <span class="vse-label">
+        <span class="vse-name">${esc(item.name)}</span>
+        ${price ? `<span class="vse-price">${esc(price)}</span>` : ""}
+      </span>` : (price ? `<span class="vse-price is-floating">${esc(price)}</span>` : "");
 
     return `
       <div class="${classes.join(" ")}" draggable="true"
@@ -1019,9 +1019,9 @@ export class GridPileApp extends (ApplicationV2 ?? Application) {
            data-w="${tile.w}" data-h="${tile.h}"
            style="--x:${tile.x};--y:${tile.y};--w:${tile.w};--h:${tile.h}"
            data-tooltip="${esc(tooltip)}">
-        <span class="vgp-tile-art"><img src="${esc(item.img)}" alt="" draggable="false"></span>
-        ${quantity > 1 ? `<span class="vgp-qty">${quantity}</span>` : ""}
-        ${notForSale ? `<i class="fas fa-lock vgp-lock"></i>` : ""}
+        <span class="vse-tile-art"><img src="${esc(item.img)}" alt="" draggable="false"></span>
+        ${quantity > 1 ? `<span class="vse-qty">${quantity}</span>` : ""}
+        ${notForSale ? `<i class="fas fa-lock vse-lock"></i>` : ""}
         ${label}
       </div>`;
   }
@@ -1031,11 +1031,11 @@ export class GridPileApp extends (ApplicationV2 ?? Application) {
   /* ---------------------------------------- */
 
   _bind(root) {
-    for (const button of root.querySelectorAll("[data-vgp-action]")) {
-      button.addEventListener("click", (event) => this._onAction(event, button.dataset.vgpAction));
+    for (const button of root.querySelectorAll("[data-vse-action]")) {
+      button.addEventListener("click", (event) => this._onAction(event, button.dataset.vseAction));
     }
 
-    for (const tile of root.querySelectorAll(".vgp-tile")) {
+    for (const tile of root.querySelectorAll(".vse-tile")) {
       tile.addEventListener("dragstart", (event) => {
         this._dragged = true;
         this._onDragStart(event, tile);
@@ -1057,17 +1057,17 @@ export class GridPileApp extends (ApplicationV2 ?? Application) {
       tile.addEventListener("contextmenu", (event) => this._onInspect(event, tile));
     }
 
-    for (const control of root.querySelectorAll("[data-vgp-filter]")) {
+    for (const control of root.querySelectorAll("[data-vse-filter]")) {
       const event = control.tagName === "SELECT" ? "change" : "click";
       control.addEventListener(event, () => {
         const filters = this._filtersFor(control.dataset.side);
-        filters[control.dataset.vgpFilter] = control.dataset.value ?? control.value;
+        filters[control.dataset.vseFilter] = control.dataset.value ?? control.value;
         this._focus = null;
         this.render();
       });
     }
 
-    for (const search of root.querySelectorAll(".vgp-search")) {
+    for (const search of root.querySelectorAll(".vse-search")) {
       search.addEventListener("input", () => {
         const side = search.dataset.side;
         this._filtersFor(side).query = search.value;
@@ -1077,7 +1077,7 @@ export class GridPileApp extends (ApplicationV2 ?? Application) {
       });
     }
 
-    for (const grid of root.querySelectorAll(".vgp-grid")) {
+    for (const grid of root.querySelectorAll(".vse-grid")) {
       grid.addEventListener("dragover", (event) => this._onDragOver(event, grid));
       grid.addEventListener("dragleave", (event) => {
         if (!grid.contains(event.relatedTarget)) this._clearGhosts(grid);
@@ -1127,10 +1127,10 @@ export class GridPileApp extends (ApplicationV2 ?? Application) {
     const clampedX = Math.min(x, cols - w);
     const clampedY = Math.min(y, rows - h);
 
-    let ghost = grid.querySelector(".vgp-ghost");
+    let ghost = grid.querySelector(".vse-ghost");
     if (!ghost) {
       ghost = document.createElement("div");
-      ghost.className = "vgp-ghost";
+      ghost.className = "vse-ghost";
       grid.appendChild(ghost);
     }
     ghost.style.setProperty("--x", clampedX);
@@ -1140,8 +1140,8 @@ export class GridPileApp extends (ApplicationV2 ?? Application) {
   }
 
   _clearGhosts(root) {
-    const scope = root?.closest?.(".vgp-root") ?? root;
-    for (const ghost of scope.querySelectorAll(".vgp-ghost")) ghost.remove();
+    const scope = root?.closest?.(".vse-root") ?? root;
+    for (const ghost of scope.querySelectorAll(".vse-ghost")) ghost.remove();
     for (const tile of scope.querySelectorAll(".is-dragging")) tile.classList.remove("is-dragging");
   }
 
@@ -1164,7 +1164,7 @@ export class GridPileApp extends (ApplicationV2 ?? Application) {
   async _moveWithinPanel(payload, side, cell) {
     const data = this._sides?.[side];
     if (!data?.editable) {
-      return ui.notifications.warn(game.i18n.localize("VGP.Warn.NoPermission"));
+      return ui.notifications.warn(game.i18n.localize("VSE.Warn.NoPermission"));
     }
 
     const layout = foundry.utils.deepClone(data.actor.getFlag(MODULE_ID, FLAGS.LAYOUT) ?? {});
@@ -1191,10 +1191,10 @@ export class GridPileApp extends (ApplicationV2 ?? Application) {
   /** Motivo por el que un objeto no puede cruzar de panel, o `null` si puede. */
   _blockedReason(payload, item) {
     if (this.isMerchant && payload.side === "target" && pileFlag(this.pile, "purchaseOnly")) {
-      return "VGP.Warn.PurchaseOnly";
+      return "VSE.Warn.PurchaseOnly";
     }
     if (payload.side === "source" && getProperty(item, IP_ITEM_FLAGS.NOT_FOR_SALE)) {
-      return "VGP.Warn.NotForSale";
+      return "VSE.Warn.NotForSale";
     }
     return null;
   }
@@ -1204,7 +1204,7 @@ export class GridPileApp extends (ApplicationV2 ?? Application) {
     const API = api();
     const from = payload.side === "source" ? this.pile : this.recipient;
     const to = payload.side === "source" ? this.recipient : this.pile;
-    if (!from || !to) return ui.notifications.warn(game.i18n.localize("VGP.Warn.NoCharacter"));
+    if (!from || !to) return ui.notifications.warn(game.i18n.localize("VSE.Warn.NoCharacter"));
 
     const item = from.items.get(payload.itemId);
     if (!item) return;
@@ -1310,7 +1310,7 @@ export class GridPileApp extends (ApplicationV2 ?? Application) {
 
     const DialogV2 = foundry.applications?.api?.DialogV2;
     const content = `
-      <p>${esc(game.i18n.format("VGP.HowMany", { name: item.name, max: available }))}</p>
+      <p>${esc(game.i18n.format("VSE.HowMany", { name: item.name, max: available }))}</p>
       <input type="number" name="quantity" value="1" min="1" max="${available}" step="1" autofocus>`;
 
     if (!DialogV2) {
@@ -1320,7 +1320,7 @@ export class GridPileApp extends (ApplicationV2 ?? Application) {
           content,
           buttons: {
             ok: {
-              label: game.i18n.localize("VGP.Confirm"),
+              label: game.i18n.localize("VSE.Confirm"),
               callback: (html) => resolve(Number(html.find("[name=quantity]").val()) || 0)
             },
             cancel: { label: game.i18n.localize("Cancel"), callback: () => resolve(0) }
@@ -1335,7 +1335,7 @@ export class GridPileApp extends (ApplicationV2 ?? Application) {
       window: { title: item.name },
       content,
       ok: {
-        label: game.i18n.localize("VGP.Confirm"),
+        label: game.i18n.localize("VSE.Confirm"),
         callback: (event, button) => Number(button.form.elements.quantity.value) || 0
       },
       rejectClose: false
@@ -1354,7 +1354,7 @@ export class GridPileApp extends (ApplicationV2 ?? Application) {
     const canInspect = game.user.isGM
       || side === "target"
       || pileFlag(this.pile, "canInspectItems") !== false;
-    if (!canInspect) return ui.notifications.warn(game.i18n.localize("VGP.Warn.NoInspect"));
+    if (!canInspect) return ui.notifications.warn(game.i18n.localize("VSE.Warn.NoInspect"));
 
     let price = "";
     if (this.isMerchant) {
@@ -1365,8 +1365,8 @@ export class GridPileApp extends (ApplicationV2 ?? Application) {
 
     const other = side === "source" ? this.recipient : this.pile;
     const takeKey = this.isMerchant
-      ? (side === "source" ? "VGP.Detail.Buy" : "VGP.Detail.Sell")
-      : (side === "source" ? "VGP.Detail.Take" : "VGP.Detail.Store");
+      ? (side === "source" ? "VSE.Detail.Buy" : "VSE.Detail.Sell")
+      : (side === "source" ? "VSE.Detail.Take" : "VSE.Detail.Store");
 
     return ItemDetailApp.show(item, {
       grid: this,
@@ -1384,7 +1384,7 @@ export class GridPileApp extends (ApplicationV2 ?? Application) {
   async takeFromDetail(itemId, side) {
     // La ficha sobrevive a su tienda: comprar desde ella con la tienda ya
     // cerrada no debe resucitar la ventana.
-    if (!this.rendered) return ui.notifications.warn(game.i18n.localize("VGP.Warn.Closed"));
+    if (!this.rendered) return ui.notifications.warn(game.i18n.localize("VSE.Warn.Closed"));
 
     const tile = this._sides?.[side]?.tiles?.find((entry) => entry.id === itemId);
     const payload = {
@@ -1401,10 +1401,10 @@ export class GridPileApp extends (ApplicationV2 ?? Application) {
     event.preventDefault();
     switch (action) {
       case "take-all":
-        if (!this.recipient) return ui.notifications.warn(game.i18n.localize("VGP.Warn.NoCharacter"));
+        if (!this.recipient) return ui.notifications.warn(game.i18n.localize("VSE.Warn.NoCharacter"));
         // `transferEverything` mueve sin cobrar: contra un mercader seria robar.
         // El boton ni se dibuja, pero la accion se protege igual.
-        if (this.isMerchant) return ui.notifications.warn(game.i18n.localize("VGP.Warn.NoTakeAllMerchant"));
+        if (this.isMerchant) return ui.notifications.warn(game.i18n.localize("VSE.Warn.NoTakeAllMerchant"));
         await api().transferEverything(this.pile, this.recipient, { interactionId: this.interactionId });
         return this.render();
       case "pick-actor":
@@ -1418,7 +1418,7 @@ export class GridPileApp extends (ApplicationV2 ?? Application) {
 
   async _pickRecipient() {
     const owned = game.actors.filter((actor) => actor.isOwner && actor.uuid !== this.pile?.uuid);
-    if (!owned.length) return ui.notifications.warn(game.i18n.localize("VGP.Warn.NoOwnedActors"));
+    if (!owned.length) return ui.notifications.warn(game.i18n.localize("VSE.Warn.NoOwnedActors"));
 
     const options = owned.map((actor) => `<option value="${actor.id}">${esc(actor.name)}</option>`).join("");
     const content = `<select name="actor" style="width:100%">${options}</select>`;
@@ -1426,13 +1426,13 @@ export class GridPileApp extends (ApplicationV2 ?? Application) {
 
     const chosen = DialogV2
       ? await DialogV2.prompt({
-        window: { title: game.i18n.localize("VGP.PickCharacter") },
+        window: { title: game.i18n.localize("VSE.PickCharacter") },
         content,
         ok: { callback: (event, button) => button.form.elements.actor.value },
         rejectClose: false
       })
       : await new Promise((resolve) => new Dialog({
-        title: game.i18n.localize("VGP.PickCharacter"),
+        title: game.i18n.localize("VSE.PickCharacter"),
         content,
         buttons: { ok: { label: "OK", callback: (html) => resolve(html.find("[name=actor]").val()) } },
         close: () => resolve(null)
@@ -1455,13 +1455,13 @@ export class GridPileApp extends (ApplicationV2 ?? Application) {
       `<option value="${value}" ${value === current ? "selected" : ""}>${esc(label)}</option>`;
     const triState = (name, current) => `
       <select name="${name}">
-        ${option("default", current, game.i18n.localize("VGP.Config.Default"))}
-        ${option("yes", current, game.i18n.localize("VGP.Config.Yes"))}
-        ${option("no", current, game.i18n.localize("VGP.Config.No"))}
+        ${option("default", current, game.i18n.localize("VSE.Config.Default"))}
+        ${option("yes", current, game.i18n.localize("VSE.Config.Yes"))}
+        ${option("no", current, game.i18n.localize("VSE.Config.No"))}
       </select>`;
 
     const textField = (name, value, label, hint) => `
-      <label class="vgp-field">
+      <label class="vse-field">
         <span>${esc(label)}</span>
         <input type="text" name="${name}" value="${esc(value)}" placeholder="${esc(hint)}">
       </label>`;
@@ -1471,12 +1471,12 @@ export class GridPileApp extends (ApplicationV2 ?? Application) {
       const icon = kind === "audio" ? "fas fa-file-audio" : "fas fa-file-image";
       const hint = kind === "audio" ? "sounds/tienda/bienvenida.ogg" : "worlds/mi-mundo/tienda.webp";
       return `
-        <label class="vgp-field">
+        <label class="vse-field">
           <span>${esc(label)}</span>
-          <span class="vgp-config-pick">
+          <span class="vse-config-pick">
             <input type="text" name="${name}" value="${esc(value)}" placeholder="${hint}">
-            <button type="button" class="vgp-browse" data-target="${name}" data-kind="${kind}"
-                    title="${esc(game.i18n.localize("VGP.Config.Browse"))}">
+            <button type="button" class="vse-browse" data-target="${name}" data-kind="${kind}"
+                    title="${esc(game.i18n.localize("VSE.Config.Browse"))}">
               <i class="${icon}"></i>
             </button>
           </span>
@@ -1491,40 +1491,40 @@ export class GridPileApp extends (ApplicationV2 ?? Application) {
     };
 
     const content = `
-      <div class="vgp-config">
-        <h3>${esc(game.i18n.localize("VGP.Config.IdentityTitle"))}</h3>
-        <p class="vgp-config-note">${esc(game.i18n.localize("VGP.Config.IdentityNote"))}</p>
-        ${textField("shopName", this.shopName, game.i18n.localize("VGP.Config.ShopName"), this.pile.name)}
-        ${textField("vendorName", this.vendorName, game.i18n.localize("VGP.Config.VendorName"),
-          game.i18n.localize(this.isMerchant ? "VGP.Merchant" : "VGP.Container"))}
+      <div class="vse-config">
+        <h3>${esc(game.i18n.localize("VSE.Config.IdentityTitle"))}</h3>
+        <p class="vse-config-note">${esc(game.i18n.localize("VSE.Config.IdentityNote"))}</p>
+        ${textField("shopName", this.shopName, game.i18n.localize("VSE.Config.ShopName"), this.pile.name)}
+        ${textField("vendorName", this.vendorName, game.i18n.localize("VSE.Config.VendorName"),
+          game.i18n.localize(this.isMerchant ? "VSE.Merchant" : "VSE.Container"))}
 
-        <h3>${esc(game.i18n.localize("VGP.Config.SceneryTitle"))}</h3>
-        <p class="vgp-config-note">${esc(game.i18n.localize("VGP.Config.SceneryNote"))}</p>
-        ${fileField("background", background, game.i18n.localize("VGP.Config.Background"))}
-        ${fileField("portrait", portrait, game.i18n.localize("VGP.Config.Portrait"))}
+        <h3>${esc(game.i18n.localize("VSE.Config.SceneryTitle"))}</h3>
+        <p class="vse-config-note">${esc(game.i18n.localize("VSE.Config.SceneryNote"))}</p>
+        ${fileField("background", background, game.i18n.localize("VSE.Config.Background"))}
+        ${fileField("portrait", portrait, game.i18n.localize("VSE.Config.Portrait"))}
 
-        <h3>${esc(game.i18n.localize("VGP.Config.SoundTitle"))}</h3>
-        <p class="vgp-config-note">${esc(game.i18n.localize("VGP.Config.SoundNote"))}</p>
-        ${fileField("soundWelcome", sounds.welcome, game.i18n.localize("VGP.Config.SoundWelcome"), "audio")}
-        ${fileField("soundFarewell", sounds.farewell, game.i18n.localize("VGP.Config.SoundFarewell"), "audio")}
-        ${fileField("soundBuy", sounds.buy, game.i18n.localize("VGP.Config.SoundBuy"), "audio")}
-        ${fileField("soundSell", sounds.sell, game.i18n.localize("VGP.Config.SoundSell"), "audio")}
+        <h3>${esc(game.i18n.localize("VSE.Config.SoundTitle"))}</h3>
+        <p class="vse-config-note">${esc(game.i18n.localize("VSE.Config.SoundNote"))}</p>
+        ${fileField("soundWelcome", sounds.welcome, game.i18n.localize("VSE.Config.SoundWelcome"), "audio")}
+        ${fileField("soundFarewell", sounds.farewell, game.i18n.localize("VSE.Config.SoundFarewell"), "audio")}
+        ${fileField("soundBuy", sounds.buy, game.i18n.localize("VSE.Config.SoundBuy"), "audio")}
+        ${fileField("soundSell", sounds.sell, game.i18n.localize("VSE.Config.SoundSell"), "audio")}
 
-        <h3>${esc(game.i18n.localize("VGP.Config.GridTitle"))}</h3>
-        <label class="vgp-field">
-          <span>${esc(game.i18n.localize("VGP.Config.Cols"))}</span>
+        <h3>${esc(game.i18n.localize("VSE.Config.GridTitle"))}</h3>
+        <label class="vse-field">
+          <span>${esc(game.i18n.localize("VSE.Config.Cols"))}</span>
           <input type="number" name="cols" value="${cols}" min="2" max="30">
         </label>
-        <label class="vgp-field">
-          <span>${esc(game.i18n.localize("VGP.Config.Rows"))}</span>
+        <label class="vse-field">
+          <span>${esc(game.i18n.localize("VSE.Config.Rows"))}</span>
           <input type="number" name="rows" value="${rows}" min="2" max="30">
         </label>
-        <label class="vgp-field">
-          <span>${esc(game.i18n.localize("VGP.Config.Strict"))}</span>
+        <label class="vse-field">
+          <span>${esc(game.i18n.localize("VSE.Config.Strict"))}</span>
           ${triState("strict", strict)}
         </label>
-        <label class="vgp-field">
-          <span>${esc(game.i18n.localize("VGP.Config.UseGrid"))}</span>
+        <label class="vse-field">
+          <span>${esc(game.i18n.localize("VSE.Config.UseGrid"))}</span>
           ${triState("use", use)}
         </label>
       </div>`;
@@ -1533,13 +1533,13 @@ export class GridPileApp extends (ApplicationV2 ?? Application) {
     if (!DialogV2) return ui.notifications.warn("DialogV2 no disponible en esta version de Foundry.");
 
     const values = await DialogV2.prompt({
-      window: { title: `${this.pile.name} - ${game.i18n.localize("VGP.Configure")}` },
-      classes: ["vgp-config-dialog"],
+      window: { title: `${this.pile.name} - ${game.i18n.localize("VSE.Configure")}` },
+      classes: ["vse-config-dialog"],
       position: { width: 620 },
       content,
       render: (event, dialog) => bindImagePickers(dialog?.element ?? event?.target),
       ok: {
-        label: game.i18n.localize("VGP.Confirm"),
+        label: game.i18n.localize("VSE.Confirm"),
         callback: (event, button) => ({
           shopName: button.form.elements.shopName.value.trim(),
           vendorName: button.form.elements.vendorName.value.trim(),
@@ -1575,7 +1575,7 @@ export class GridPileApp extends (ApplicationV2 ?? Application) {
     });
 
     if (values.use === "no") {
-      ui.notifications.info(game.i18n.localize("VGP.Info.NativeNext"));
+      ui.notifications.info(game.i18n.localize("VSE.Info.NativeNext"));
       return this.close();
     }
     return this.render();

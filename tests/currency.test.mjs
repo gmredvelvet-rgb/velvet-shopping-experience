@@ -103,7 +103,7 @@ async function arrastrar(app, desde, hacia, itemId = "w1") {
   llamadas.length = 0;
   app._shiftHeld = false;
   await app._transferBetweenPanels(
-    { module: "velvet-grid-piles", side: desde, itemId, w: 1, h: 1 },
+    { module: "velvet-shopping-experience", side: desde, itemId, w: 1, h: 1 },
     hacia,
     { x: 0, y: 0 }
   );
@@ -169,10 +169,10 @@ console.log("Tomar todo");
   avisos.length = 0;
   await tienda._onAction({ preventDefault() {} }, "take-all");
   check("contra un mercader no hace nada", llamadas.length === 0, String(llamadas.length));
-  check("y lo explica", avisos.at(-1) === "VGP.Warn.NoTakeAllMerchant", avisos.at(-1));
+  check("y lo explica", avisos.at(-1) === "VSE.Warn.NoTakeAllMerchant", avisos.at(-1));
 
   check("el boton ni se dibuja en una tienda",
-    !(await tienda._renderHTML()).includes('data-vgp-action="take-all"'));
+    !(await tienda._renderHTML()).includes('data-vse-action="take-all"'));
 }
 
 console.log("");
@@ -262,7 +262,7 @@ console.log("Un arrastre abandonado no contamina el siguiente");
   // Se empieza a arrastrar y se suelta fuera de cualquier grilla: `drop` no
   // llega nunca, solo `dragend`. Si el arrastre siguiera vivo, el proximo
   // objeto que entrase en la ventana se tomaria por este.
-  app._dragging = { module: "velvet-grid-piles", side: "source", itemId: "w1", w: 1, h: 1 };
+  app._dragging = { module: "velvet-shopping-experience", side: "source", itemId: "w1", w: 1, h: 1 };
   const raiz = { querySelectorAll: () => [], closest: () => null };
   app._clearGhosts(raiz);
   app._dragging = null; // lo que hace ahora el manejador de dragend
@@ -281,7 +281,7 @@ console.log("La ficha no resucita una tienda cerrada");
   avisos.length = 0;
   await app.takeFromDetail("w1", "source");
   check("no transfiere nada", llamadas.length === 0, String(llamadas.length));
-  check("y lo dice", avisos.at(-1) === "VGP.Warn.Closed", avisos.at(-1));
+  check("y lo dice", avisos.at(-1) === "VSE.Warn.Closed", avisos.at(-1));
 }
 
 console.log("");

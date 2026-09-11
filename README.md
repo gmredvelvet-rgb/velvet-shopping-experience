@@ -1,4 +1,4 @@
-# Velvet Grid Piles
+# Velvet Shopping Experience
 
 Sustituye las ventanas de **contenedores, pilas de botín y mercaderes** de Item Piles por un
 inventario en rejilla estilo Stoneshard / Diablo: cada objeto ocupa las casillas que le
@@ -33,7 +33,7 @@ La huella de cada objeto se resuelve en cascada, de lo más explícito a lo más
 
 | Prioridad | Fuente | Notas |
 |---|---|---|
-| 1 | `flags.velvet-grid-piles.size` | Lo que fijes a mano desde este módulo. |
+| 1 | `flags.velvet-shopping-experience.size` | Lo que fijes a mano desde este módulo. |
 | 2 | `flags.item-piles.item.width` / `.height` | El mismo dato que usan los vaults de Item Piles. |
 | 3 | Flags de los compendios de Fatmorbus | Stoneshard Items, Food & Drink, Shadowdark. |
 | 4 | Dimensiones del PNG | Solo si son múltiplo exacto de 108 px por casilla. |
@@ -52,7 +52,7 @@ agrupados — la configuración de la pila en `flags.item-piles.data.*` y la del
 Para fijar un tamaño a mano:
 
 ```js
-game.velvetGridPiles.setItemSize(item, 2, 3);   // escribe ambos dialectos de flag
+game.velvetShoppingExperience.setItemSize(item, 2, 3);   // escribe ambos dialectos de flag
 ```
 
 ---
@@ -115,7 +115,7 @@ la ventana.
 - **Arrastrar desde un compendio o una hoja** hacia la rejilla: añade el objeto a la pila (solo GM).
 - **Botón de engranaje** (solo GM): columnas, filas, capacidad real y volver a la UI nativa.
 
-Las posiciones se guardan en `flags.velvet-grid-piles.layout` **del actor**, como un único mapa
+Las posiciones se guardan en `flags.velvet-shopping-experience.layout` **del actor**, como un único mapa
 `{ idDeObjeto: {x, y} }`. Un solo `update` por movimiento, y nada que escribir en objetos que no
 son tuyos: quien no tenga permiso de edición ve un empaquetado automático determinista, igual
 para todos, y puede seguir arrastrando objetos fuera (eso lo resuelve el socket de Item Piles).
@@ -137,10 +137,10 @@ para todos, y puede seguir arrastrando objetos fuera (eso lo resuelve el socket 
 ## API
 
 ```js
-game.velvetGridPiles.open(pileActor, recipientActor);  // abre la ventana a mano
-game.velvetGridPiles.footprintOf(item);                // -> { w, h }
-game.velvetGridPiles.setItemSize(item, w, h);
-game.velvetGridPiles.resetLayout(actor);               // olvida las posiciones guardadas
+game.velvetShoppingExperience.open(pileActor, recipientActor);  // abre la ventana a mano
+game.velvetShoppingExperience.footprintOf(item);                // -> { w, h }
+game.velvetShoppingExperience.setItemSize(item, w, h);
+game.velvetShoppingExperience.resetLayout(actor);               // olvida las posiciones guardadas
 ```
 
 ---
@@ -173,7 +173,7 @@ para que nunca te quedes sin poder abrir un cofre.
 Para saber qué pasó, selecciona el token y ejecuta en la consola (F12) o en una macro:
 
 ```js
-await game.velvetGridPiles.diagnose();
+await game.velvetShoppingExperience.diagnose();
 ```
 
 Devuelve la versión de Item Piles, si el hook está registrado, el tipo de pila, si decidimos

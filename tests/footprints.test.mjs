@@ -14,7 +14,7 @@ const check = (name, got, want) => {
 
 console.log("\n1. Prioridad de flags");
 check("flag propio manda",
-  itemFootprint({ type: "loot", flags: { "velvet-grid-piles": { size: { w: 2, h: 3 } }, "item-piles": { item: { width: 1, height: 1 } } } }),
+  itemFootprint({ type: "loot", flags: { "velvet-shopping-experience": { size: { w: 2, h: 3 } }, "item-piles": { item: { width: 1, height: 1 } } } }),
   { w: 2, h: 3 });
 check("flags de item-piles (vault, bajo .item)",
   itemFootprint({ type: "loot", flags: { "item-piles": { item: { width: 2, height: 2 } } } }),

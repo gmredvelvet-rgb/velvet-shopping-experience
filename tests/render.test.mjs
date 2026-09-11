@@ -46,7 +46,7 @@ function makeActor(name, items, { isOwner = true, flags = {} } = {}) {
     name, uuid: `Actor.${name}`, img: `worlds/test/${name}.webp`, isOwner, flags,
     items: { get: (id) => map.get(id), [Symbol.iterator]: () => map.values() },
     getFlag: (scope, key) => flags?.[scope]?.[key],
-    setDecor: (clave, valor) => { (flags["velvet-grid-piles"] ??= {})[clave] = valor; },
+    setDecor: (clave, valor) => { (flags["velvet-shopping-experience"] ??= {})[clave] = valor; },
     setFlag: async () => {},
     update: async () => {}
   };
@@ -103,7 +103,7 @@ async function attempt(label, pileActor, recipient) {
     const app = new GridPileApp(pileActor, recipient, { id: "test" });
     const html = await app._renderHTML();
     console.log(`  ok    render de ${html.length} caracteres`);
-    const tiles = (html.match(/class="vgp-tile/g) ?? []).length;
+    const tiles = (html.match(/class="vse-tile/g) ?? []).length;
     console.log(`  ok    ${tiles} casillas dibujadas`);
     return true;
   } catch (error) {
@@ -176,7 +176,7 @@ console.log("9. Pestanas, busqueda y orden");
   console.log(`  ${unaSola ? "ok  " : "FAIL"} busqueda filtra -> ${buscada.side.tiles.length} casilla(s)`);
 
   const vacia = await panel(pile, hero, { query: "zzzz" });
-  const sinNada = vacia.side.tiles.length === 0 && vacia.html.includes("VGP.NoMatches");
+  const sinNada = vacia.side.tiles.length === 0 && vacia.html.includes("VSE.NoMatches");
   if (!sinNada) ok = false;
   console.log(`  ${sinNada ? "ok  " : "FAIL"} busqueda sin resultados avisa`);
 
@@ -199,7 +199,7 @@ console.log("9. Pestanas, busqueda y orden");
   if (!primeroCaro) ok = false;
   console.log(`  ${primeroCaro ? "ok  " : "FAIL"} precio descendente -> primero ${enOrden2[0]?.item.name}`);
 
-  const conEtiqueta = base.html.includes("vgp-label") && base.html.includes("Espada larga");
+  const conEtiqueta = base.html.includes("vse-label") && base.html.includes("Espada larga");
   if (!conEtiqueta) ok = false;
   console.log(`  ${conEtiqueta ? "ok  " : "FAIL"} nombre visible en la casilla`);
 }
@@ -241,7 +241,7 @@ console.log("10. Decorado por tienda");
   if (!sinUrlEnAtributos) ok = false;
   console.log(`  ${sinUrlEnAtributos ? "ok  " : "FAIL"} la ruta no viaja en el atributo style`);
 
-  const capa = html.match(/<img class="vgp-scene-layer" src="([^"]+)"/);
+  const capa = html.match(/<img class="vse-scene-layer" src="([^"]+)"/);
   const pintado = capa?.[1] === "/worlds/x/herreria.webp";
   if (!pintado) ok = false;
   console.log(`  ${pintado ? "ok  " : "FAIL"} el decorado se dibuja -> ${capa?.[1]}`);
@@ -253,7 +253,7 @@ console.log("10. Decorado por tienda");
   if (!conRetrato) ok = false;
   console.log(`  ${conRetrato ? "ok  " : "FAIL"} retrato propio de la tienda`);
 
-  const alto = html2.includes("--vgp-portrait:168px");
+  const alto = html2.includes("--vse-portrait:168px");
   if (!alto) ok = false;
   console.log(`  ${alto ? "ok  " : "FAIL"} alto de retrato configurable`);
 
@@ -270,19 +270,19 @@ console.log("11. El precio no se pierde");
   pile.flags["item-piles"].data.type = "merchant";
 
   const conPersonaje = await new GridPileApp(pile, hero, { id: "t" })._renderHTML();
-  const bien1 = conPersonaje.includes("vgp-price") && conPersonaje.includes("5 GP");
+  const bien1 = conPersonaje.includes("vse-price") && conPersonaje.includes("5 GP");
   if (!bien1) ok = false;
   console.log(`  ${bien1 ? "ok  " : "FAIL"} con personaje elegido`);
 
   const sinPersonaje = await new GridPileApp(pile, null, { id: "t" })._renderHTML();
-  const bien2 = sinPersonaje.includes("vgp-price") && sinPersonaje.includes("5 GP");
+  const bien2 = sinPersonaje.includes("vse-price") && sinPersonaje.includes("5 GP");
   if (!bien2) ok = false;
   console.log(`  ${bien2 ? "ok  " : "FAIL"} sin personaje elegido`);
 
   // En un contenedor no hay precio que ensenar, y eso es correcto.
   pile.flags["item-piles"].data.type = "container";
   const contenedor = await new GridPileApp(pile, hero, { id: "t" })._renderHTML();
-  const bien3 = !contenedor.includes("vgp-price");
+  const bien3 = !contenedor.includes("vse-price");
   if (!bien3) ok = false;
   console.log(`  ${bien3 ? "ok  " : "FAIL"} un contenedor no ensena precios`);
 
@@ -302,7 +302,7 @@ console.log("12. Nombres editables");
   if (!bien1) ok = false;
   console.log(`  ${bien1 ? "ok  " : "FAIL"} sin rotulo usa el nombre del actor`);
 
-  const bien2 = porDefecto.includes("VGP.Merchant");
+  const bien2 = porDefecto.includes("VSE.Merchant");
   if (!bien2) ok = false;
   console.log(`  ${bien2 ? "ok  " : "FAIL"} sin vendedor usa el tipo de pila`);
 
@@ -315,7 +315,7 @@ console.log("12. Nombres editables");
   if (!bien3) ok = false;
   console.log(`  ${bien3 ? "ok  " : "FAIL"} rotulo propio`);
 
-  const bien4 = conNombres.includes("Bram el Tuerto") && !conNombres.includes("VGP.Merchant");
+  const bien4 = conNombres.includes("Bram el Tuerto") && !conNombres.includes("VSE.Merchant");
   if (!bien4) ok = false;
   console.log(`  ${bien4 ? "ok  " : "FAIL"} vendedor propio sustituye al tipo`);
 
@@ -324,14 +324,14 @@ console.log("12. Nombres editables");
   console.log(`  ${bien5 ? "ok  " : "FAIL"} la barra de titulo tambien -> ${app.title}`);
 
   // El panel del personaje no se toca: sigue siendo su nombre.
-  const bien6 = conNombres.includes("Heroe") && conNombres.includes("VGP.Yours");
+  const bien6 = conNombres.includes("Heroe") && conNombres.includes("VSE.Yours");
   if (!bien6) ok = false;
   console.log(`  ${bien6 ? "ok  " : "FAIL"} el panel del personaje no cambia`);
 
   pile.setDecor("shopName", "");
   pile.setDecor("vendorName", "");
   const vuelta = await new GridPileApp(pile, hero, { id: "t" })._renderHTML();
-  const bien7 = vuelta.includes("VGP.Merchant") && vuelta.includes("Cofre");
+  const bien7 = vuelta.includes("VSE.Merchant") && vuelta.includes("Cofre");
   if (!bien7) ok = false;
   console.log(`  ${bien7 ? "ok  " : "FAIL"} vaciarlos vuelve a lo de antes`);
 }

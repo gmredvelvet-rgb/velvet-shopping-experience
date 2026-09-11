@@ -10,6 +10,7 @@
 import { MODULE_ID, warn } from "./constants.js";
 import { GridPileApp, defaultRecipient, pileUsesGrid, toActor } from "./app.js";
 import { itemFootprint, normalizeSize } from "./footprints.js";
+import { migrateFromLegacyId, registerMigrationSetting } from "./migration.js";
 
 const PRE_RENDER_INTERFACE = "item-piles-preRenderInterface";
 
@@ -23,8 +24,8 @@ function registerSettings() {
   };
 
   const toggle = (key, def, scope = "world") => game.settings.register(MODULE_ID, key, {
-    name: `VGP.Settings.${key}.Name`,
-    hint: `VGP.Settings.${key}.Hint`,
+    name: `VSE.Settings.${key}.Name`,
+    hint: `VSE.Settings.${key}.Hint`,
     scope,
     config: true,
     type: Boolean,
@@ -33,8 +34,8 @@ function registerSettings() {
   });
 
   const number = (key, def, { min, max, step = 1, scope = "world" }) => game.settings.register(MODULE_ID, key, {
-    name: `VGP.Settings.${key}.Name`,
-    hint: `VGP.Settings.${key}.Hint`,
+    name: `VSE.Settings.${key}.Name`,
+    hint: `VSE.Settings.${key}.Hint`,
     scope,
     config: true,
     type: Number,
@@ -44,8 +45,8 @@ function registerSettings() {
   });
 
   game.settings.register(MODULE_ID, "backgroundImage", {
-    name: "VGP.Settings.backgroundImage.Name",
-    hint: "VGP.Settings.backgroundImage.Hint",
+    name: "VSE.Settings.backgroundImage.Name",
+    hint: "VSE.Settings.backgroundImage.Hint",
     scope: "world",
     config: true,
     type: String,
@@ -65,8 +66,8 @@ function registerSettings() {
   number("portraitSize", 168, { min: 80, max: 320, scope: "world" });
 
   game.settings.register(MODULE_ID, "soundVolume", {
-    name: "VGP.Settings.soundVolume.Name",
-    hint: "VGP.Settings.soundVolume.Hint",
+    name: "VSE.Settings.soundVolume.Name",
+    hint: "VSE.Settings.soundVolume.Hint",
     scope: "client",
     config: true,
     type: Number,
@@ -93,7 +94,7 @@ const bypass = new Set();
  */
 function fallbackToNative(target, inspectingTarget, error) {
   console.error(`${MODULE_ID} | La rejilla fallo al abrirse; se cede a Item Piles.`, error);
-  ui.notifications.error(`Velvet Grid Piles: ${error?.message ?? error}`, { permanent: true });
+  ui.notifications.error(`Velvet Shopping Experience: ${error?.message ?? error}`, { permanent: true });
   bypass.add(target.uuid);
   try {
     game.itempiles.API.renderItemPileInterface(target, { inspectingTarget: toActor(inspectingTarget) });
@@ -129,7 +130,7 @@ function interceptItemPiles() {
       // Fallo sincrono: Item Piles todavia no ha sido cancelado, asi que basta
       // con dejarle continuar su curso normal.
       console.error(`${MODULE_ID} | No se pudo construir la ventana de rejilla.`, error);
-      ui.notifications.error(`Velvet Grid Piles: ${error?.message ?? error}`, { permanent: true });
+      ui.notifications.error(`Velvet Shopping Experience: ${error?.message ?? error}`, { permanent: true });
       return undefined;
     }
   });
@@ -238,7 +239,7 @@ async function diagnose(actor) {
 }
 
 function exposeAPI() {
-  game.velvetGridPiles = {
+  game.velvetShoppingExperience = {
     GridPileApp,
     diagnose,
     open: (pile, recipient) => GridPileApp.show(pile, recipient ?? defaultRecipient(pile)),
@@ -253,11 +254,13 @@ function exposeAPI() {
 
 Hooks.once("init", () => {
   registerSettings();
+  registerMigrationSetting();
 });
 
 Hooks.once("ready", () => {
+  migrateFromLegacyId();
   if (!game.modules.get("item-piles")?.active) {
-    return ui.notifications.error(game.i18n.localize("VGP.Warn.NoItemPiles"));
+    return ui.notifications.error(game.i18n.localize("VSE.Warn.NoItemPiles"));
   }
   interceptItemPiles();
   watchDocuments();

@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.10.0
+
+El modulo pasa a llamarse **Velvet Shopping Experience**.
+
+### Cambiado
+
+- Nuevo id `velvet-shopping-experience` (antes `velvet-grid-piles`). La carpeta del modulo, los
+  flags, los ajustes, la API (`game.velvetShoppingExperience`) y los prefijos de CSS e i18n
+  (`vse-`, `VSE.`) cambian con el. Quien tenga estilos o macros propios que usen los nombres
+  viejos debe actualizarlos.
+- La ventana trae un fondo incluido (`assets/backgrounds/defaultbg.png`) como fondo por defecto.
+  Se puede cambiar o vaciar desde los ajustes del modulo.
+
+### Migracion
+
+- Al cargar el mundo, un GM copia una sola vez los datos guardados con el id viejo: posiciones,
+  decorado y sonidos de cada tienda, tamanos fijados a mano, ajustes del mundo y de cliente, y
+  los tokens sin vincular. Los datos viejos no se borran. Los compendios no se migran.
+- Hay que desactivar e instalar el modulo con su nombre nuevo: Foundry lo ve como un modulo
+  distinto.
+
 ## 0.9.0
 
 Auditoria del codigo. Seis fallos encontrados y corregidos.
@@ -85,13 +106,13 @@ Repaso del manejo del dinero en los dos sistemas.
   un prefijo de ruta.
 - El oscurecido pasa a un pseudo-elemento encima de la imagen; el contenido va por encima de los
   dos.
-- `game.velvetGridPiles.diagnose()` ahora pide la imagen al servidor con un HEAD y dice si
+- `game.velvetShoppingExperience.diagnose()` ahora pide la imagen al servidor con un HEAD y dice si
   responde, para distinguir "la ruta esta mal" de "la imagen no llega".
 
 ## 0.4.4
 
 - **El fondo no se pintaba nunca, aunque la ruta fuera correcta.** La imagen se emitia como
-  `style="...--vgp-scene:url("ruta")"`, y las comillas dobles del `url()` cerraban el atributo
+  `style="...--vse-scene:url("ruta")"`, y las comillas dobles del `url()` cerraban el atributo
   `style` a mitad: la variable quedaba invalida y con ella toda la regla del fondo, que caia al
   tema de madera. Ahora la ruta se aplica con `setProperty` despues del pintado, donde no hay
   atributo que escapar.
@@ -231,7 +252,7 @@ Rediseno de la ventana: de lista con rejilla a mostrador de tienda.
 - **Red de seguridad**: si la ventana de rejilla falla al abrirse, se avisa en pantalla, se
   registra el error en consola y se reabre la pila con la interfaz nativa de Item Piles. Antes,
   un fallo de render dejaba la pila sin abrir nada, porque el hook ya la habia cancelado.
-- Nuevo `game.velvetGridPiles.diagnose()` y suite `tests/render.test.mjs`, que reproduce el
+- Nuevo `game.velvetShoppingExperience.diagnose()` y suite `tests/render.test.mjs`, que reproduce el
   render completo con stubs.
 
 ## 0.1.0

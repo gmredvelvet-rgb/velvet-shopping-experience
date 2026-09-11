@@ -31,8 +31,8 @@ const check = (nombre, real, esperado) => {
 /** Crea una pila con ese fondo y devuelve lo que el modulo acaba usando. */
 function fondo(ruta) {
   const pile = {
-    uuid: "Actor.p", name: "Tienda", flags: { "velvet-grid-piles": { background: ruta } },
-    getFlag: (scope, key) => (scope === "velvet-grid-piles" ? { background: ruta }[key] : undefined),
+    uuid: "Actor.p", name: "Tienda", flags: { "velvet-shopping-experience": { background: ruta } },
+    getFlag: (scope, key) => (scope === "velvet-shopping-experience" ? { background: ruta }[key] : undefined),
     items: { get: () => undefined }
   };
   return new GridPileApp(pile, null, { id: "t" }).background;
@@ -50,13 +50,13 @@ check("recurso de red con barras", fondo("//servidor/arte/fondo.png"), "");
 console.log("");
 console.log(`  ${avisos.length >= 6 ? "ok  " : "FAIL"} se avisa al GM en cada caso (${avisos.length} avisos)`);
 if (avisos.length < 6) fallos++;
-const explica = avisos.every((m) => m.startsWith("VGP.Warn.AbsolutePath"));
+const explica = avisos.every((m) => m.startsWith("VSE.Warn.AbsolutePath"));
 console.log(`  ${explica ? "ok  " : "FAIL"} el aviso explica el motivo`);
 if (!explica) fallos++;
 
 console.log("");
 console.log("Rutas de la carpeta de datos: se aceptan");
-check("carpeta suelta", fondo("vgp-backgrounds/fodno.png"), "vgp-backgrounds/fodno.png");
+check("carpeta suelta", fondo("vse-backgrounds/fodno.png"), "vse-backgrounds/fodno.png");
 check("dentro de un mundo", fondo("worlds/mi-mundo/tienda.webp"), "worlds/mi-mundo/tienda.webp");
 check("dentro de un modulo", fondo("modules/x/assets/a.png"), "modules/x/assets/a.png");
 check("con espacios", fondo("arte de tiendas/herreria.png"), "arte de tiendas/herreria.png");
@@ -65,8 +65,8 @@ check("vacio", fondo(""), "");
 
 console.log("");
 console.log("El ajuste de mundo se usa cuando la tienda no tiene fondo propio");
-SETTINGS.backgroundImage = "vgp-backgrounds/general.webp";
-check("hereda del mundo", fondo(""), "vgp-backgrounds/general.webp");
+SETTINGS.backgroundImage = "vse-backgrounds/general.webp";
+check("hereda del mundo", fondo(""), "vse-backgrounds/general.webp");
 SETTINGS.backgroundImage = "C:\\ruta\\mala.png";
 check("y tambien se valida", fondo(""), "");
 
@@ -81,8 +81,8 @@ console.log("El marcado no puede llevar la url dentro del atributo style");
 {
   const pile = {
     uuid: "Actor.p", name: "Tienda", img: "t.webp",
-    getFlag: (scope, key) => (scope === "velvet-grid-piles"
-      ? { background: "vgp-backgrounds/fodno.png" }[key]
+    getFlag: (scope, key) => (scope === "velvet-shopping-experience"
+      ? { background: "vse-backgrounds/fodno.png" }[key]
       : undefined),
     items: { get: () => undefined }
   };
@@ -115,8 +115,8 @@ console.log("El marcado no puede llevar la url dentro del atributo style");
 
   // Y la ruta sigue llegando, pero por la via correcta.
   // El decorado es una <img> real, con ruta absoluta desde la raiz.
-  const capa = html.match(/<img class="vgp-scene-layer" src="([^"]+)"/);
-  const ok2 = capa?.[1] === "/vgp-backgrounds/fodno.png";
+  const capa = html.match(/<img class="vse-scene-layer" src="([^"]+)"/);
+  const ok2 = capa?.[1] === "/vse-backgrounds/fodno.png";
   if (!ok2) fallos++;
   console.log(`  ${ok2 ? "ok  " : "FAIL"} capa de imagen en el DOM -> ${capa?.[1]}`);
 
