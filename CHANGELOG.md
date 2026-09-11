@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.11.0
+
+### Anadido
+
+- **Licencia de Patreon (soft gate).** Ninguna funcion se bloquea: sin licencia, el
+  modulo funciona entero y solo aparece un recordatorio de prueba gratuita.
+- **Velvet License Hub como dependencia.** Foundry lo instala junto con este modulo, y
+  una sola conexion de Patreon en el hub licencia todos los modulos de GM RedVelvet, en
+  todos los mundos. Con el hub activo, este modulo no muestra tarjeta, recordatorio ni
+  menu de licencia propios.
+
 ## 0.10.0
 
 El modulo pasa a llamarse **Velvet Shopping Experience**.

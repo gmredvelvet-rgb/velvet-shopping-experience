@@ -2,7 +2,7 @@
   "id": "velvet-shopping-experience",
   "title": "Velvet Shopping Experience",
   "description": "Sustituye las ventanas de contenedores, pilas y mercaderes de Item Piles por un inventario en grilla estilo Stoneshard: cada objeto ocupa las casillas que le corresponden por su arte o su peso, se arrastra libremente y se intercambia entre el contenedor y el personaje. Toda la economia y las transferencias siguen corriendo por la API de Item Piles, asi que funciona igual en D&D 5e y Pathfinder 2e.",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "authors": [
     {
       "name": "GM RedVelvet",
@@ -23,10 +23,12 @@
   "changelog": "https://github.com/gmredvelvet-rgb/velvet-shopping-experience/blob/main/CHANGELOG.md",
   "license": "SEE LICENSE IN LICENSE",
   "esmodules": [
-    "scripts/main.js"
+    "scripts/main.js",
+    "scripts/license/boot.js"
   ],
   "styles": [
-    "styles/velvet-shopping-experience.css"
+    "styles/velvet-shopping-experience.css",
+    "styles/license.css"
   ],
   "languages": [
     {
@@ -50,6 +52,14 @@
           "verified": "3.3.4"
         },
         "reason": "Toda la logica de contenedores, mercaderes, precios y transferencias vive en Item Piles. Este modulo solo reemplaza su interfaz por una grilla."
+      },
+      {
+        "id": "velvet-license-hub",
+        "type": "module",
+        "manifest": "https://github.com/gmredvelvet-rgb/velvet-license-hub/releases/latest/download/module.json",
+        "compatibility": {
+          "minimum": "2.0.0"
+        }
       }
     ],
     "recommends": [
