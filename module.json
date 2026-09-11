@@ -1,0 +1,63 @@
+{
+  "id": "velvet-grid-piles",
+  "title": "Velvet Grid Piles",
+  "description": "Sustituye las ventanas de contenedores, pilas y mercaderes de Item Piles por un inventario en grilla estilo Stoneshard: cada objeto ocupa las casillas que le corresponden por su arte o su peso, se arrastra libremente y se intercambia entre el contenedor y el personaje. Toda la economia y las transferencias siguen corriendo por la API de Item Piles, asi que funciona igual en D&D 5e y Pathfinder 2e.",
+  "version": "0.9.0",
+  "authors": [
+    {
+      "name": "GM RedVelvet",
+      "email": "gmredvelvet@gmail.com",
+      "url": "https://github.com/gmredvelvet-rgb",
+      "discord": "gmredvelvet"
+    }
+  ],
+  "compatibility": {
+    "minimum": "13",
+    "verified": "14"
+  },
+  "url": "https://github.com/gmredvelvet-rgb/velvet-grid-piles",
+  "manifest": "https://github.com/gmredvelvet-rgb/velvet-grid-piles/releases/latest/download/module.json",
+  "download": "https://github.com/gmredvelvet-rgb/velvet-grid-piles/releases/latest/download/module.zip",
+  "readme": "https://github.com/gmredvelvet-rgb/velvet-grid-piles#readme",
+  "bugs": "https://github.com/gmredvelvet-rgb/velvet-grid-piles/issues",
+  "changelog": "https://github.com/gmredvelvet-rgb/velvet-grid-piles/blob/main/CHANGELOG.md",
+  "license": "SEE LICENSE IN LICENSE",
+  "esmodules": [
+    "scripts/main.js"
+  ],
+  "styles": [
+    "styles/velvet-grid-piles.css"
+  ],
+  "languages": [
+    {
+      "lang": "es",
+      "name": "Espanol",
+      "path": "lang/es.json"
+    },
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    }
+  ],
+  "relationships": {
+    "requires": [
+      {
+        "id": "item-piles",
+        "type": "module",
+        "compatibility": {
+          "minimum": "3.0.0",
+          "verified": "3.3.4"
+        },
+        "reason": "Toda la logica de contenedores, mercaderes, precios y transferencias vive en Item Piles. Este modulo solo reemplaza su interfaz por una grilla."
+      }
+    ],
+    "recommends": [
+      {
+        "id": "stoneshard-sheet-by-fatmorbus",
+        "type": "module",
+        "reason": "Si esta activo se reutilizan sus tamanos exactos de objeto para que un item ocupe lo mismo en la hoja y en el contenedor."
+      }
+    ]
+  }
+}

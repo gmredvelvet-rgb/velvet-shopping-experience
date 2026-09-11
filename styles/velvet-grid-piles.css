@@ -1,0 +1,981 @@
+/*
+ * Tema de mostrador: madera, laton y pergamino.
+ *
+ * Todo se dibuja con gradientes y sombras, sin un solo archivo de imagen, para
+ * no depender de los assets de ningun otro modulo. El arte de fondo es opcional
+ * y lo pone el usuario desde los ajustes (--vgp-scene).
+ *
+ * El tamano entero cuelga de --vgp-cell.
+ */
+
+.vgp-window {
+  --vgp-ink: #ecdfc4;
+  --vgp-dim: #a99878;
+  --vgp-gold: #d9a441;
+  --vgp-gold-soft: rgba(217, 164, 65, 0.35);
+  --vgp-blood: #8c3a2b;
+  --vgp-wood-dark: #241708;
+  --vgp-wood: #3a2612;
+  --vgp-wood-light: #55381b;
+  --vgp-well: rgba(12, 8, 4, 0.72);
+  --vgp-line: rgba(217, 164, 65, 0.14);
+  --vgp-cell: 76px;
+  --vgp-label: 30px;
+  --vgp-portrait: 168px;
+  --vgp-portrait-max: 260px;
+}
+
+.vgp-window .window-content {
+  padding: 0;
+  color: var(--vgp-ink);
+  background: var(--vgp-wood-dark);
+  overflow: hidden;
+}
+
+.vgp-root {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 10px;
+  height: 100%;
+  padding: 12px;
+  box-sizing: border-box;
+  font-family: "Signika", sans-serif;
+
+  /* Vetas de madera: dos gradientes cruzados y un vineteado encima. */
+  background-color: var(--vgp-wood);
+  background-image:
+    radial-gradient(ellipse at 50% 0%, rgba(217, 164, 65, 0.12), transparent 60%),
+    repeating-linear-gradient(93deg,
+      rgba(0, 0, 0, 0.22) 0 2px, transparent 2px 7px, rgba(255, 255, 255, 0.02) 7px 9px),
+    linear-gradient(180deg, var(--vgp-wood-light), var(--vgp-wood-dark));
+}
+
+/*
+ * Con arte de fondo, la madera cede el sitio.
+ *
+ * El decorado es una <img> real detras de todo, no un background-image con una
+ * variable CSS: asi la ruta la resuelve el navegador como cualquier imagen y no
+ * depende de donde se declarase la variable ni de la base de la hoja de estilos.
+ */
+.vgp-scene-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border: none;
+  border-radius: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Oscurecido encima del arte, para que iconos y texto se sigan leyendo. */
+.vgp-root.has-scene::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(10, 6, 3, 0.5), rgba(10, 6, 3, 0.78));
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* El contenido vive por encima del decorado. */
+.vgp-root > .vgp-panel,
+.vgp-root > .vgp-divider {
+  position: relative;
+  z-index: 2;
+}
+
+/* -------------------------------------------- */
+/*  Panel                                       */
+/* -------------------------------------------- */
+
+.vgp-panel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 8px;
+}
+
+/* -------------------------------------------- */
+/*  Cabecera de escena                          */
+/* -------------------------------------------- */
+
+.vgp-scene-head {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: end;
+  gap: 14px;
+  padding: 0 6px 10px;
+  /* Altura fija y sin encogerse: la cabecera reserva su sitio y el retrato no
+     puede invadir las pestanas de abajo. */
+  flex: 0 0 auto;
+  height: calc(var(--vgp-portrait) + 10px);
+  border-bottom: 1px solid var(--vgp-gold-soft);
+}
+
+/*
+ * El retrato no vive en una caja: se funde con el decorado.
+ *
+ * Sin borde, sin fondo y sin recorte duro. La mascara desvanece los cuatro
+ * lados para que la figura parezca recortada sobre la escena en vez de pegada
+ * dentro de un marco. Solo la sombra proyectada le da cuerpo.
+ */
+.vgp-portrait {
+  width: auto;
+  max-width: var(--vgp-portrait-max);
+  height: var(--vgp-portrait);
+  flex: 0 0 auto;
+  display: grid;
+  place-items: end center;
+  border: none;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  color: var(--vgp-dim);
+  font-size: 2rem;
+  /* Red de seguridad: pase lo que pase con la imagen, no se sale de aqui.
+     `clip` con margen contiene igual que `hidden` pero deja que la sombra
+     proyectada respire unos pixeles; `hidden` queda de reserva. */
+  overflow: hidden;
+  overflow: clip;
+  overflow-clip-margin: 14px;
+}
+
+.vgp-portrait img {
+  width: auto;
+  max-width: var(--vgp-portrait-max);
+  /* Altura explicita, no porcentual: un `height:100%` que no encuentra contra
+     que resolverse hace que el navegador use el tamano real del archivo, y un
+     icono de 512 px se comia media ventana. */
+  height: var(--vgp-portrait);
+  max-height: var(--vgp-portrait);
+  object-fit: contain;
+  object-position: bottom;
+  border: none;
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.85));
+
+  /* Desvanecido de los bordes: la figura se integra con el fondo. */
+  -webkit-mask-image:
+    linear-gradient(to bottom, transparent 0%, #000 12%, #000 88%, transparent 100%),
+    linear-gradient(to right, transparent 0%, #000 10%, #000 90%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(to bottom, transparent 0%, #000 12%, #000 88%, transparent 100%),
+    linear-gradient(to right, transparent 0%, #000 10%, #000 90%, transparent 100%);
+  mask-composite: intersect;
+}
+
+.vgp-ident {
+  min-width: 0;
+}
+
+.vgp-ident h2 {
+  margin: 0;
+  border: none;
+  font-family: "Modesto Condensed", "Signika", serif;
+  font-size: 2.1rem;
+  font-weight: 700;
+  line-height: 1.05;
+  color: #fff;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.9);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.vgp-role {
+  display: block;
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--vgp-gold);
+}
+
+.vgp-quote {
+  margin: 4px 0 0;
+  font-size: 0.78rem;
+  font-style: italic;
+  line-height: 1.25;
+  color: var(--vgp-dim);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/*
+ * El panel del personaje va en espejo: retrato hacia el borde exterior y
+ * monedas hacia el centro. Asi las dos figuras se miran entre si en vez de
+ * apretarse las dos contra el divisor.
+ */
+.vgp-panel[data-side="target"] .vgp-portrait {
+  order: 3;
+}
+
+.vgp-panel[data-side="target"] .vgp-ident {
+  order: 2;
+  text-align: right;
+}
+
+.vgp-panel[data-side="target"] .vgp-currencies {
+  order: 1;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.vgp-currencies {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  align-items: flex-end;
+  text-align: right;
+}
+
+.vgp-coin {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--vgp-gold);
+  white-space: nowrap;
+  text-shadow: 0 1px 2px #000;
+}
+
+.vgp-coin img {
+  width: 16px;
+  height: 16px;
+  border: none;
+  object-fit: contain;
+}
+
+/* -------------------------------------------- */
+/*  Marco de madera                             */
+/* -------------------------------------------- */
+
+.vgp-frame {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+  border-radius: 4px;
+  border: 2px solid #16100a;
+  background:
+    linear-gradient(180deg, rgba(85, 56, 27, 0.95), rgba(36, 23, 8, 0.95));
+  box-shadow:
+    inset 0 0 0 1px rgba(217, 164, 65, 0.22),
+    inset 0 2px 18px rgba(0, 0, 0, 0.6),
+    0 6px 18px rgba(0, 0, 0, 0.5);
+}
+
+/* -------------------------------------------- */
+/*  Pestanas de categoria                       */
+/* -------------------------------------------- */
+
+.vgp-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.vgp-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: auto;
+  padding: 5px 10px;
+  font-size: 0.76rem;
+  line-height: 1;
+  color: var(--vgp-dim);
+  background: rgba(10, 6, 3, 0.55);
+  border: 1px solid rgba(217, 164, 65, 0.18);
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.vgp-tab:hover {
+  color: var(--vgp-ink);
+  border-color: var(--vgp-gold-soft);
+  box-shadow: none;
+}
+
+.vgp-tab.is-active {
+  color: #1a1108;
+  background: linear-gradient(180deg, #e6bb5f, #b3822a);
+  border-color: #f0d08a;
+  font-weight: 600;
+}
+
+.vgp-tab i {
+  font-size: 0.85em;
+}
+
+/* -------------------------------------------- */
+/*  Buscador y orden                            */
+/* -------------------------------------------- */
+
+.vgp-toolbar {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.vgp-search-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+}
+
+.vgp-search-wrap i {
+  position: absolute;
+  left: 8px;
+  font-size: 0.8rem;
+  color: var(--vgp-dim);
+  pointer-events: none;
+}
+
+.vgp-search {
+  width: 100%;
+  height: 28px;
+  padding: 0 8px 0 26px;
+  font-size: 0.8rem;
+  color: var(--vgp-ink);
+  background: rgba(10, 6, 3, 0.6);
+  border: 1px solid rgba(217, 164, 65, 0.22);
+  border-radius: 3px;
+}
+
+.vgp-search:focus {
+  border-color: var(--vgp-gold);
+  box-shadow: 0 0 6px rgba(217, 164, 65, 0.35);
+  outline: none;
+}
+
+.vgp-sort {
+  flex: 0 0 auto;
+  max-width: 46%;
+  height: 28px;
+  font-size: 0.76rem;
+  color: var(--vgp-ink);
+  background: rgba(10, 6, 3, 0.6);
+  border: 1px solid rgba(217, 164, 65, 0.22);
+  border-radius: 3px;
+}
+
+.vgp-sort option {
+  background: #241708;
+  color: var(--vgp-ink);
+}
+
+/* -------------------------------------------- */
+/*  Grilla                                      */
+/* -------------------------------------------- */
+
+.vgp-grid-wrap {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  /* Nunca a lo ancho: si la grilla desbordara, el navegador la cortaria por los
+     dos lados y quedarian objetos inalcanzables. Solo crece hacia abajo. */
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 6px;
+  border-radius: 3px;
+  background: var(--vgp-well);
+  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.7);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(217, 164, 65, 0.5) rgba(0, 0, 0, 0.3);
+}
+
+.vgp-grid-wrap::-webkit-scrollbar {
+  width: 10px;
+}
+
+.vgp-grid-wrap::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 5px;
+}
+
+.vgp-grid-wrap::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #b3822a, #6d4d15);
+  border-radius: 5px;
+  border: 1px solid rgba(240, 208, 138, 0.35);
+}
+
+.vgp-grid {
+  position: relative;
+  /* `margin:auto` centra sin recortar; `justify-content:center` en el padre si
+     recorta cuando el contenido es mas ancho que el hueco. */
+  margin: 0 auto;
+  width: calc(var(--cols) * var(--vgp-cell));
+  max-width: 100%;
+  height: calc(var(--rows) * var(--vgp-cell));
+  background-image:
+    repeating-linear-gradient(0deg, var(--vgp-line) 0 1px, transparent 1px var(--vgp-cell)),
+    repeating-linear-gradient(90deg, var(--vgp-line) 0 1px, transparent 1px var(--vgp-cell));
+  background-size: var(--vgp-cell) var(--vgp-cell);
+  outline: 1px solid var(--vgp-line);
+}
+
+.vgp-empty {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  margin: 0;
+  text-align: center;
+  font-style: italic;
+  font-size: 0.8rem;
+  color: var(--vgp-dim);
+  pointer-events: none;
+}
+
+/* -------------------------------------------- */
+/*  Casillas                                    */
+/* -------------------------------------------- */
+
+.vgp-tile {
+  position: absolute;
+  left: calc(var(--x) * var(--vgp-cell));
+  top: calc(var(--y) * var(--vgp-cell));
+  width: calc(var(--w) * var(--vgp-cell));
+  height: calc(var(--h) * var(--vgp-cell));
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  padding: 3px;
+  cursor: grab;
+  border: 1px solid rgba(217, 164, 65, 0.16);
+  border-radius: 2px;
+  background:
+    radial-gradient(ellipse at 50% 35%, rgba(236, 223, 196, 0.1), transparent 70%),
+    rgba(0, 0, 0, 0.25);
+  transition: border-color 90ms linear, box-shadow 90ms linear;
+}
+
+.vgp-tile:hover {
+  border-color: var(--vgp-gold);
+  box-shadow: 0 0 10px rgba(217, 164, 65, 0.35), inset 0 0 12px rgba(217, 164, 65, 0.12);
+  z-index: 2;
+}
+
+.vgp-tile.is-dragging {
+  opacity: 0.35;
+  cursor: grabbing;
+}
+
+.vgp-tile-art {
+  flex: 1;
+  min-height: 0;
+  display: block;
+}
+
+.vgp-tile-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border: none;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.8));
+}
+
+.vgp-tile.is-locked .vgp-tile-art img {
+  filter: grayscale(0.75) brightness(0.6);
+}
+
+.vgp-tile.is-hidden-item {
+  border-style: dashed;
+  border-color: rgba(140, 58, 43, 0.9);
+}
+
+/* Rareza: mismo codigo de color en 5e y PF2e, para que el ojo lo aprenda una vez. */
+.vgp-tile.is-uncommon { --vgp-rarity: #4e9a52; }
+.vgp-tile.is-rare { --vgp-rarity: #3f7bd4; }
+.vgp-tile.is-veryrare { --vgp-rarity: #9a52c9; }
+.vgp-tile.is-legendary { --vgp-rarity: #d98b28; }
+.vgp-tile.is-artifact { --vgp-rarity: #c0392b; }
+.vgp-tile.is-unique { --vgp-rarity: #c94f8a; }
+
+.vgp-tile.is-uncommon,
+.vgp-tile.is-rare,
+.vgp-tile.is-veryrare,
+.vgp-tile.is-legendary,
+.vgp-tile.is-artifact,
+.vgp-tile.is-unique {
+  border-color: var(--vgp-rarity);
+  background:
+    radial-gradient(ellipse at 50% 35%, color-mix(in srgb, var(--vgp-rarity) 26%, transparent), transparent 72%),
+    rgba(0, 0, 0, 0.3);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--vgp-rarity) 45%, transparent);
+}
+
+.vgp-tile.is-legendary .vgp-name,
+.vgp-tile.is-artifact .vgp-name {
+  color: color-mix(in srgb, var(--vgp-rarity) 70%, #fff);
+}
+
+/* Nombre y precio, como la etiqueta de un escaparate. */
+.vgp-label {
+  flex: 0 0 auto;
+  height: var(--vgp-label);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 2px;
+  text-align: center;
+  pointer-events: none;
+}
+
+.vgp-name {
+  font-size: 0.66rem;
+  line-height: 1.1;
+  color: var(--vgp-ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-shadow: 0 1px 2px #000;
+}
+
+.vgp-price {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--vgp-gold);
+  text-shadow: 0 1px 2px #000;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Sin etiqueta, el precio flota en la esquina inferior. */
+.vgp-price.is-floating {
+  position: absolute;
+  left: 4px;
+  bottom: 2px;
+  max-width: calc(100% - 8px);
+  font-size: 0.66rem;
+}
+
+/*
+ * Casilla pequena: se sacrifica el nombre, nunca el precio.
+ *
+ * La etiqueta pasa a flotar sobre el arte con un degradado detras, para que el
+ * precio siga leyendose sin robarle sitio al icono.
+ */
+.vgp-grid.is-compact .vgp-tile {
+  padding: 2px;
+}
+
+.vgp-grid.is-compact .vgp-name {
+  display: none;
+}
+
+.vgp-grid.is-compact .vgp-label {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: auto;
+  padding: 6px 3px 1px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.85), transparent);
+}
+
+.vgp-grid.is-compact .vgp-price {
+  font-size: 0.66rem;
+}
+
+.vgp-qty {
+  position: absolute;
+  right: 3px;
+  top: 2px;
+  min-width: 15px;
+  padding: 0 3px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-align: center;
+  color: #1a1108;
+  background: linear-gradient(180deg, #e6bb5f, #b3822a);
+  border-radius: 2px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+  pointer-events: none;
+}
+
+.vgp-lock {
+  position: absolute;
+  left: 4px;
+  top: 3px;
+  font-size: 0.7rem;
+  color: var(--vgp-blood);
+  text-shadow: 0 1px 2px #000;
+  pointer-events: none;
+}
+
+.vgp-ghost {
+  position: absolute;
+  left: calc(var(--x) * var(--vgp-cell));
+  top: calc(var(--y) * var(--vgp-cell));
+  width: calc(var(--w) * var(--vgp-cell));
+  height: calc(var(--h) * var(--vgp-cell));
+  border: 1px solid var(--vgp-gold);
+  background: rgba(217, 164, 65, 0.18);
+  box-shadow: inset 0 0 12px rgba(217, 164, 65, 0.3);
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* -------------------------------------------- */
+/*  Pie y divisor                               */
+/* -------------------------------------------- */
+
+.vgp-panel-foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 28px;
+  padding: 0 4px;
+}
+
+.vgp-overflow {
+  font-size: 0.72rem;
+  color: var(--vgp-blood);
+}
+
+.vgp-divider {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 44px;
+  color: var(--vgp-gold);
+  font-size: 1.1rem;
+  text-shadow: 0 1px 3px #000;
+}
+
+.vgp-mini {
+  width: auto;
+  min-width: 30px;
+  height: 30px;
+  line-height: 1;
+  padding: 0 8px;
+  font-size: 0.76rem;
+  color: var(--vgp-ink);
+  background: linear-gradient(180deg, rgba(85, 56, 27, 0.95), rgba(36, 23, 8, 0.95));
+  border: 1px solid rgba(217, 164, 65, 0.35);
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.vgp-mini:hover {
+  border-color: var(--vgp-gold);
+  box-shadow: 0 0 8px rgba(217, 164, 65, 0.3);
+}
+
+.vgp-picker {
+  margin-left: auto;
+}
+
+/* -------------------------------------------- */
+/*  Dialogo de configuracion                    */
+/* -------------------------------------------- */
+
+/*
+ * Dos columnas cuando hay sitio, una cuando no, y scroll de reserva.
+ *
+ * Con identidad, decorado, cuatro sonidos y la grilla, en una sola columna la
+ * ventana se salia de la pantalla.
+ */
+.vgp-config {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 8px 16px;
+  align-content: start;
+  max-height: min(62vh, 620px);
+  overflow-y: auto;
+  padding-right: 8px;
+  scrollbar-width: thin;
+}
+
+/* Los titulos y las notas cruzan de lado a lado. */
+.vgp-config h3,
+.vgp-config-note {
+  grid-column: 1 / -1;
+}
+
+.vgp-config-note {
+  margin: 0;
+  font-size: 0.8rem;
+  opacity: 0.75;
+}
+
+/* Todos los campos con la misma forma: etiqueta arriba, control abajo. */
+.vgp-field {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 3px;
+  min-width: 0;
+}
+
+.vgp-field > span {
+  font-size: 0.78rem;
+  opacity: 0.85;
+}
+
+.vgp-config input,
+.vgp-config select {
+  width: 100%;
+  min-width: 0;
+}
+
+.vgp-config-pick {
+  display: flex;
+  gap: 4px;
+}
+
+.vgp-config-pick input {
+  flex: 1;
+  min-width: 0;
+}
+
+.vgp-browse {
+  flex: 0 0 auto;
+  width: 32px;
+  cursor: pointer;
+}
+
+/* Ventanas estrechas: los paneles se apilan en vez de encogerse. */
+@media (max-width: 780px) {
+  .vgp-root {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr auto 1fr;
+  }
+
+  .vgp-divider {
+    flex-direction: row;
+    width: auto;
+  }
+}
+
+/* -------------------------------------------- */
+/*  Ficha del objeto                            */
+/* -------------------------------------------- */
+
+.vgp-detail-window .window-content {
+  padding: 0;
+}
+
+.vgp-detail {
+  --vgp-rarity: var(--vgp-gold);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 14px;
+  box-sizing: border-box;
+  background-color: var(--vgp-wood-dark);
+  background-image:
+    radial-gradient(ellipse at 50% 0%, rgba(217, 164, 65, 0.1), transparent 60%),
+    linear-gradient(180deg, rgba(85, 56, 27, 0.55), rgba(20, 13, 5, 0.95));
+  color: var(--vgp-ink);
+  overflow: hidden;
+}
+
+.vgp-detail.is-uncommon { --vgp-rarity: #4e9a52; }
+.vgp-detail.is-rare { --vgp-rarity: #3f7bd4; }
+.vgp-detail.is-veryrare { --vgp-rarity: #9a52c9; }
+.vgp-detail.is-legendary { --vgp-rarity: #d98b28; }
+.vgp-detail.is-artifact { --vgp-rarity: #c0392b; }
+.vgp-detail.is-unique { --vgp-rarity: #c94f8a; }
+
+.vgp-detail-head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--vgp-gold-soft);
+}
+
+.vgp-detail-art {
+  width: 96px;
+  height: 96px;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 3px;
+  border: 1px solid var(--vgp-rarity);
+  background:
+    radial-gradient(ellipse at 50% 35%, color-mix(in srgb, var(--vgp-rarity) 28%, transparent), transparent 72%),
+    rgba(0, 0, 0, 0.45);
+  box-shadow: inset 0 0 18px color-mix(in srgb, var(--vgp-rarity) 22%, transparent);
+}
+
+.vgp-detail-art img {
+  width: 84%;
+  height: 84%;
+  object-fit: contain;
+  border: none;
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.9));
+}
+
+.vgp-detail-ident {
+  min-width: 0;
+}
+
+.vgp-detail-ident h2 {
+  margin: 0 0 2px;
+  border: none;
+  font-family: "Modesto Condensed", "Signika", serif;
+  font-size: 1.6rem;
+  line-height: 1.1;
+  color: #fff;
+  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.9);
+}
+
+.vgp-detail-kind {
+  display: block;
+  font-size: 0.76rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--vgp-dim);
+}
+
+.vgp-detail-rarity {
+  display: inline-block;
+  margin-top: 5px;
+  padding: 2px 8px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #120c05;
+  background: var(--vgp-rarity);
+  border-radius: 2px;
+}
+
+.vgp-detail-price {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 8px 10px;
+  font-size: 1.05rem;
+  color: var(--vgp-gold);
+  background: rgba(0, 0, 0, 0.4);
+  border-left: 3px solid var(--vgp-gold);
+  border-radius: 2px;
+}
+
+.vgp-detail-flag {
+  margin-left: auto;
+  font-size: 0.72rem;
+  font-style: italic;
+  color: var(--vgp-blood);
+}
+
+.vgp-detail-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 6px;
+  margin: 12px 0 0;
+}
+
+.vgp-detail-facts > div {
+  padding: 6px 8px;
+  background: rgba(0, 0, 0, 0.32);
+  border-radius: 2px;
+  border-bottom: 1px solid rgba(217, 164, 65, 0.18);
+}
+
+.vgp-detail-facts dt {
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--vgp-dim);
+}
+
+.vgp-detail-facts dd {
+  margin: 1px 0 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--vgp-ink);
+}
+
+.vgp-detail-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.vgp-detail-tags li {
+  padding: 2px 8px;
+  font-size: 0.7rem;
+  text-transform: capitalize;
+  color: var(--vgp-ink);
+  background: rgba(217, 164, 65, 0.14);
+  border: 1px solid rgba(217, 164, 65, 0.3);
+  border-radius: 10px;
+}
+
+.vgp-detail-body {
+  flex: 1;
+  min-height: 0;
+  margin-top: 12px;
+  padding: 10px 12px;
+  overflow-y: auto;
+  font-size: 0.86rem;
+  line-height: 1.5;
+  background: rgba(0, 0, 0, 0.32);
+  border-radius: 3px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(217, 164, 65, 0.5) rgba(0, 0, 0, 0.3);
+}
+
+.vgp-detail-body :is(h1, h2, h3, h4) {
+  border: none;
+  color: var(--vgp-gold);
+  font-family: "Modesto Condensed", "Signika", serif;
+}
+
+.vgp-detail-body a {
+  color: var(--vgp-gold);
+}
+
+.vgp-detail-empty {
+  margin: 0;
+  font-style: italic;
+  color: var(--vgp-dim);
+}
+
+.vgp-detail-foot {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.vgp-detail-foot .vgp-mini {
+  flex: 1;
+  height: 34px;
+}
+
+/* Secciones del dialogo de ajustes de la tienda. */
+.vgp-config h3 {
+  margin: 12px 0 2px;
+  padding-bottom: 3px;
+  border-bottom: 1px solid rgba(217, 164, 65, 0.3);
+  font-size: 0.82rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--vgp-gold, #d9a441);
+}
+
+.vgp-config h3:first-child {
+  margin-top: 0;
+}
