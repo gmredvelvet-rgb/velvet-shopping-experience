@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.11.3
+
+### Anadido
+
+- **Boton "Dejar de ser pila"** al final del dialogo de decorado (solo GM). Devuelve a actor
+  normal un personaje convertido en tienda o contenedor por error: revierte sus tokens en todas
+  las escenas y apaga la marca de pila en el actor y en su token prototipo. Los objetos y las
+  monedas no se tocan.
+- `game.velvetShoppingExperience.revertPile(actor)` para hacer lo mismo desde una macro.
+
+### Corregido
+
+- Un actor convertido en pila desde su ficha, sin token en ninguna escena, no se podia
+  deshacer: la API de Item Piles solo revierte tokens y la ventana de la tienda tapaba la ficha.
+
 ## 0.11.2
 
 ### Anadido

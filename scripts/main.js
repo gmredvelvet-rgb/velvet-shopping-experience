@@ -8,7 +8,7 @@
  */
 
 import { MODULE_ID, warn } from "./constants.js";
-import { GridPileApp, defaultRecipient, pileUsesGrid, toActor } from "./app.js";
+import { GridPileApp, defaultRecipient, pileUsesGrid, revertPile, toActor } from "./app.js";
 import { itemFootprint, normalizeSize } from "./footprints.js";
 import { migrateFromLegacyId, registerMigrationSetting } from "./migration.js";
 
@@ -246,7 +246,9 @@ function exposeAPI() {
     footprintOf: (item) => itemFootprint(item, game.settings.get(MODULE_ID, "bulkyItems")),
     setItemSize,
     /** Borra las posiciones guardadas de un actor y deja que se recoloque solo. */
-    resetLayout: (actor) => actor.unsetFlag(MODULE_ID, "layout")
+    resetLayout: (actor) => actor.unsetFlag(MODULE_ID, "layout"),
+    /** Devuelve un actor convertido en pila a actor normal, tokens incluidos. */
+    revertPile
   };
 }
 

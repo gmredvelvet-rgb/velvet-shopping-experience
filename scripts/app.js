@@ -460,6 +460,35 @@ export function defaultRecipient(pile = null) {
   return game.actors.find((actor) => actor.isOwner && actor.hasPlayerOwner && notThePile(actor)) ?? null;
 }
 
+/**
+ * Deshace una pila: el actor vuelve a ser un actor normal y su ficha se abre
+ * como siempre.
+ *
+ * La API de Item Piles solo revierte tokens, asi que un personaje convertido
+ * por error desde su ficha -- sin token en ninguna escena -- se quedaba como
+ * pila para siempre. Por eso, ademas de los tokens, se apaga el flag en el
+ * actor y en su token prototipo, que es de donde lo heredan los tokens nuevos.
+ */
+export async function revertPile(pile) {
+  const actor = toActor(pile);
+  if (!actor) return;
+
+  if (actor.isToken) {
+    await api().revertTokensFromItemPiles([actor.token]);
+    return;
+  }
+
+  const tokens = game.scenes.contents.flatMap((scene) => scene.tokens.filter((token) =>
+    token.actorId === actor.id && api().isValidItemPile?.(token)
+  ));
+  if (tokens.length) await api().revertTokensFromItemPiles(tokens);
+
+  await actor.update({
+    [`${IP_PILE_DATA}.enabled`]: false,
+    [`prototypeToken.${IP_PILE_DATA}.enabled`]: false
+  });
+}
+
 /* -------------------------------------------- */
 
 const ApplicationV2 = foundry.applications?.api?.ApplicationV2;
@@ -1556,17 +1585,47 @@ export class GridPileApp extends (ApplicationV2 ?? Application) {
           <span>${esc(game.i18n.localize("VSE.Config.UseGrid"))}</span>
           ${triState("use", use)}
         </label>
+
+        <h3>${esc(game.i18n.localize("VSE.Config.PileTitle"))}</h3>
+        <p class="vse-config-note">${esc(game.i18n.localize("VSE.Config.RevertNote"))}</p>
+        <button type="button" class="vse-revert">
+          <i class="fas fa-user-slash"></i> ${esc(game.i18n.localize("VSE.Config.Revert"))}
+        </button>
       </div>`;
 
     const DialogV2 = foundry.applications?.api?.DialogV2;
     if (!DialogV2) return ui.notifications.warn("DialogV2 no disponible en esta version de Foundry.");
+
+    const bindRevert = (dialog) => {
+      dialog?.element?.querySelector(".vse-revert")?.addEventListener("click", async (event) => {
+        event.preventDefault();
+        const confirmed = await DialogV2.confirm({
+          window: { title: game.i18n.localize("VSE.Config.Revert") },
+          content: `<p>${esc(game.i18n.format("VSE.Config.RevertConfirm", { name: this.pile.name }))}</p>`,
+          rejectClose: false
+        });
+        if (!confirmed) return;
+        try {
+          await revertPile(this.pile);
+        } catch (error) {
+          warn("No se pudo deshacer la pila", error);
+          return ui.notifications.error(error.message ?? String(error));
+        }
+        ui.notifications.info(game.i18n.format("VSE.Info.Reverted", { name: this.pile.name }));
+        await dialog.close();
+        await this.close();
+      });
+    };
 
     const values = await DialogV2.prompt({
       window: { title: `${this.pile.name} - ${game.i18n.localize("VSE.Configure")}` },
       classes: ["vse-config-dialog"],
       position: { width: 620 },
       content,
-      render: (event, dialog) => bindImagePickers(dialog?.element ?? event?.target),
+      render: (event, dialog) => {
+        bindImagePickers(dialog?.element ?? event?.target);
+        bindRevert(dialog ?? event?.target);
+      },
       ok: {
         label: game.i18n.localize("VSE.Confirm"),
         callback: (event, button) => ({
