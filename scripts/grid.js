@@ -77,11 +77,6 @@ export function layoutItems(entries, { cols, rows, saved = {}, strict = false, p
     }
   }
 
-  // Los grandes primero: dejan menos agujeros irrellenables. Pero si el usuario
-  // ha pedido un orden (por precio, por nombre...), ese orden manda: ver los
-  // objetos baratos antes que los caros importa mas que aprovechar cada hueco.
-  if (!preserveOrder) floating.sort((a, b) => (b.w * b.h) - (a.w * a.h));
-
   const neededRows = () => {
     if (strict) return safeRows;
     const area = entries.reduce((total, entry) => total + entry.w * entry.h, 0);
@@ -102,6 +97,16 @@ export function layoutItems(entries, { cols, rows, saved = {}, strict = false, p
       floating.push(entry); // La posicion guardada ya no vale: se recoloca.
     }
   }
+
+  // Los recolocados vuelven a su puesto de la lista de entrada, no al final:
+  // si no, un objeto con posicion caducada acababa en cualquier hueco.
+  const order = new Map(entries.map((entry, index) => [entry.id, index]));
+  const byInput = (a, b) => order.get(a.id) - order.get(b.id);
+
+  // Los grandes primero: dejan menos agujeros irrellenables. Pero si el usuario
+  // ha pedido un orden (por precio, por nombre...), ese orden manda: ver los
+  // objetos baratos antes que los caros importa mas que aprovechar cada hueco.
+  floating.sort(preserveOrder ? byInput : (a, b) => (b.w * b.h) - (a.w * a.h) || byInput(a, b));
 
   for (const entry of floating) {
     let cell = findFreeCell(occupancy, safeCols, safeRows, entry.w, entry.h);

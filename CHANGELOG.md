@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.11.1
+
+### Corregido
+
+- **La ventana ya no sale cortada.** El panel crecia con su contenido y la ventana lo recortaba
+  por abajo; ahora cabecera, pestanas y buscador quedan fijos y solo la grilla hace scroll.
+- **Tamano fijo.** La ventana abre centrada a 1100x820 (recortada a la pantalla si es menor) y
+  ya no se redimensiona: al cambiar el ancho cambiaban las columnas y la grilla se desordenaba.
+- **Orden estable.** Los objetos sin posicion guardada se colocan siempre por categoria y
+  nombre, en vez de en el orden cambiante en que los entrega Item Piles tras cada compra. Una
+  posicion guardada que ya no cabe vuelve a su puesto en ese orden, no a cualquier hueco.
+
 ## 0.11.0
 
 ### Anadido

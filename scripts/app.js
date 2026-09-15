@@ -17,6 +17,8 @@ import { ItemDetailApp } from "./item-detail.js";
 
 const OPEN_APPS = new Map();
 
+const FIXED_SIZE = Object.freeze({ width: 1100, height: 820 });
+
 const ESCAPES = {
   "&": "&amp;",
   "<": "&lt;",
@@ -270,11 +272,12 @@ export function categoriesOf(items) {
     const value = categoryOf(item);
     if (!seen.has(value)) seen.set(value, [value, categoryLabel(value), categoryIcon(value)]);
   }
-  const rank = (value) => {
-    const index = GROUP_ORDER.indexOf(value);
-    return index === -1 ? GROUP_ORDER.length : index;
-  };
-  return [...seen.values()].sort((a, b) => rank(a[0]) - rank(b[0]) || a[1].localeCompare(b[1]));
+  return [...seen.values()].sort((a, b) => groupRank(a[0]) - groupRank(b[0]) || a[1].localeCompare(b[1]));
+}
+
+function groupRank(value) {
+  const index = GROUP_ORDER.indexOf(value);
+  return index === -1 ? GROUP_ORDER.length : index;
 }
 
 /* -------------------------------------------- */
@@ -333,8 +336,16 @@ function sortItems(items, mode) {
     case "type":
       return sorted.sort((a, b) => categoryLabel(categoryOf(a)).localeCompare(categoryLabel(categoryOf(b)))
         || String(a.name).localeCompare(String(b.name)));
-    default:
-      return sorted; // "manual": manda la posicion guardada.
+    default: {
+      // "manual": manda la posicion guardada, pero lo que aun no tiene sitio se
+      // coloca en un orden fijo. El orden en que Item Piles entrega los objetos
+      // cambia tras cada compra, y usarlo tal cual barajaba la tienda.
+      const category = new Map(sorted.map((item) => [item, categoryOf(item)]));
+      return sorted.sort((a, b) => groupRank(category.get(a)) - groupRank(category.get(b))
+        || category.get(a).localeCompare(category.get(b))
+        || String(a.name).localeCompare(String(b.name))
+        || String(a.id).localeCompare(String(b.id)));
+    }
   }
 }
 
@@ -459,7 +470,9 @@ export class GridPileApp extends (ApplicationV2 ?? Application) {
     window: {
       title: "VSE.Title",
       icon: "fas fa-grip",
-      resizable: true,
+      // Tamano fijo: al redimensionar cambiaba el numero de columnas, las
+      // posiciones guardadas dejaban de caber y la grilla se desordenaba.
+      resizable: false,
       // En la barra de titulo, con etiqueta: el engranaje del divisor es
       // diminuto y nadie encuentra ahi los ajustes del decorado.
       controls: [{
@@ -519,7 +532,8 @@ export class GridPileApp extends (ApplicationV2 ?? Application) {
     const chosen = toActor(recipient);
     const recipientActor = (chosen && chosen.uuid !== pile.uuid) ? chosen : defaultRecipient(pile);
     const app = new GridPileApp(pile, recipientActor, {
-      id: `${MODULE_ID}-${String(key).replaceAll(".", "-")}`
+      id: `${MODULE_ID}-${String(key).replaceAll(".", "-")}`,
+      position: GridPileApp.fixedPosition()
     });
     OPEN_APPS.set(key, app);
 
@@ -534,6 +548,21 @@ export class GridPileApp extends (ApplicationV2 ?? Application) {
   }
 
   static get openApps() { return OPEN_APPS; }
+
+  /**
+   * Tamano fijo de la ventana, recortado a la pantalla: en un monitor pequeno
+   * no puede salirse por abajo. Lo que no quepa lo absorbe el scroll de la grilla.
+   */
+  static fixedPosition() {
+    const width = Math.min(FIXED_SIZE.width, window.innerWidth - 40);
+    const height = Math.min(FIXED_SIZE.height, window.innerHeight - 40);
+    return {
+      width,
+      height,
+      left: Math.max(0, Math.round((window.innerWidth - width) / 2)),
+      top: Math.max(0, Math.round((window.innerHeight - height) / 2))
+    };
+  }
 
   /** Redibuja las ventanas abiertas afectadas por un actor concreto. */
   static refreshFor(actor) {
