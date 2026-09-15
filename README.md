@@ -201,6 +201,15 @@ ajustes de esta tienda"** de la barra de título de la ventana (o el engranaje d
 central), que abre el selector de archivos de Foundry. Una tienda sin fondo propio hereda el del mundo, y sin ninguno de los dos se dibuja el
 tema de madera.
 
+El modulo trae cuatro fondos listos para usar en `modules/velvet-shopping-experience/assets/backgrounds/`:
+
+| Archivo | Tienda |
+| --- | --- |
+| `defaultbg.png` | General (el fondo por defecto del mundo) |
+| `blacksmith.png` | Herreria |
+| `magic-shop.png` | Tienda de magia |
+| `potions.png` | Botica de pociones |
+
 El retrato se dibuja **sin marco**, a la altura que fijes en los ajustes, con los bordes
 desvanecidos para que la figura se integre con el decorado. Da igual si la imagen es un recorte
 con transparencia o una ilustración completa.

@@ -2,7 +2,7 @@
   "id": "velvet-shopping-experience",
   "title": "Velvet Shopping Experience",
   "description": "Sustituye las ventanas de contenedores, pilas y mercaderes de Item Piles por un inventario en grilla estilo Stoneshard: cada objeto ocupa las casillas que le corresponden por su arte o su peso, se arrastra libremente y se intercambia entre el contenedor y el personaje. Toda la economia y las transferencias siguen corriendo por la API de Item Piles, asi que funciona igual en D&D 5e y Pathfinder 2e.",
-  "version": "0.11.1",
+  "version": "0.11.2",
   "authors": [
     {
       "name": "GM RedVelvet",

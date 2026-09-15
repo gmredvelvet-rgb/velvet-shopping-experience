@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.11.2
+
+### Anadido
+
+- **Tres fondos nuevos incluidos** en `assets/backgrounds/`: `blacksmith.png` (herreria),
+  `magic-shop.png` (tienda de magia) y `potions.png` (botica). Se eligen por tienda desde el
+  dialogo de decorado, con la lupa del campo de fondo.
+
 ## 0.11.1
 
 ### Corregido
